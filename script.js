@@ -5,7 +5,7 @@
 // Replit par backend run hone ke baad
 // yahan apna actual backend URL lagana hai.
 
-const API_URL = "";
+const API_URL = "https://kit-kit-fashion-0kci.onrender.com";
 
 
 /* ===========================================
