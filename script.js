@@ -1,16 +1,20 @@
 // ============================================
-// BACKEND URL
+// BACKEND
 // ============================================
-
-// Replit par backend run hone ke baad
-// yahan apna actual backend URL lagana hai.
 
 const API_URL = "https://kit-kit-fashion-0kci.onrender.com";
 
 
-/* ===========================================
-   PRODUCTS
-=========================================== */
+// ============================================
+// OWNER
+// ============================================
+
+const OWNER_MOBILE = "9530450140";
+
+
+// ============================================
+// PRODUCTS
+// ============================================
 
 let products = [
     {
@@ -19,60 +23,46 @@ let products = [
         price: 799,
         mrp: 1199,
         rating: 4.5,
-        image:
-            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80",
-        description:
-            "Comfortable premium oversized T-shirt."
+        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80",
+        description: "Comfortable premium oversized T-shirt."
     },
-
     {
         id: "2",
         name: "Premium Casual Shirt",
         price: 1299,
         mrp: 1799,
         rating: 4.6,
-        image:
-            "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=700&q=80",
-        description:
-            "Premium casual shirt for everyday style."
+        image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=700&q=80",
+        description: "Premium casual shirt for everyday style."
     },
-
     {
         id: "3",
         name: "Everyday Hoodie",
         price: 1499,
         mrp: 2199,
         rating: 4.7,
-        image:
-            "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=700&q=80",
-        description:
-            "Soft and comfortable everyday hoodie."
+        image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=700&q=80",
+        description: "Soft and comfortable everyday hoodie."
     },
-
     {
         id: "4",
         name: "Relaxed Fit Jeans",
         price: 1599,
         mrp: 2299,
         rating: 4.4,
-        image:
-            "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=700&q=80",
-        description:
-            "Relaxed fit jeans with comfortable styling."
+        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=700&q=80",
+        description: "Relaxed fit jeans with comfortable styling."
     }
 ];
 
 
-/* ===========================================
-   CART
-=========================================== */
+// ============================================
+// CART
+// ============================================
 
-let cart =
-    JSON.parse(
-        localStorage.getItem(
-            "kitkit_cart"
-        ) || "[]"
-    );
+let cart = JSON.parse(
+    localStorage.getItem("kitkit_cart") || "[]"
+);
 
 
 function saveCart() {
@@ -88,22 +78,24 @@ function saveCart() {
 
 function updateCartCount() {
 
-    const count =
-        cart.reduce(
-            (total, item) =>
-                total + item.quantity,
-            0
-        );
+    const element =
+        document.getElementById("cartCount");
 
-    document.getElementById(
-        "cartCount"
-    ).textContent = count;
+    if (!element) return;
+
+    const count = cart.reduce(
+        (total, item) =>
+            total + Number(item.quantity || 0),
+        0
+    );
+
+    element.textContent = count;
 }
 
 
-/* ===========================================
-   PAGE NAVIGATION
-=========================================== */
+// ============================================
+// PAGE NAVIGATION
+// ============================================
 
 function hideSections() {
 
@@ -123,9 +115,9 @@ function showHome() {
         .getElementById("homeSection")
         .classList.remove("hidden");
 
-    window.scrollTo(0, 0);
-
     loadProducts();
+
+    window.scrollTo(0, 0);
 }
 
 
@@ -155,26 +147,11 @@ function showSettings() {
 }
 
 
-function showOwner() {
-
-    hideSections();
-
-    document
-        .getElementById("ownerSection")
-        .classList.remove("hidden");
-
-    window.scrollTo(0, 0);
-}
-
-
-/* ===========================================
-   PRODUCTS
-=========================================== */
+// ============================================
+// PRODUCTS
+// ============================================
 
 async function loadProducts() {
-
-    // Backend connected hone ke baad
-    // database ke products yahan se aayenge.
 
     if (!API_URL) {
 
@@ -191,28 +168,25 @@ async function loadProducts() {
             );
 
         if (!response.ok) {
-            throw new Error(
-                "Products load failed"
-            );
+            throw new Error("Products load failed");
         }
 
         const backendProducts =
             await response.json();
 
         if (
-            Array.isArray(
-                backendProducts
-            ) &&
+            Array.isArray(backendProducts) &&
             backendProducts.length
         ) {
-
-            products =
-                backendProducts;
+            products = backendProducts;
         }
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Backend unavailable:",
+            error
+        );
 
     }
 
@@ -223,86 +197,99 @@ async function loadProducts() {
 function renderProducts() {
 
     const box =
-        document.getElementById(
-            "products"
-        );
+        document.getElementById("products");
 
-    box.innerHTML = products
-        .map(product => `
+    if (!box) return;
 
-            <article
-                class="product-card"
+    box.innerHTML = products.map(product => `
+
+        <article class="product-card">
+
+            <img
+                src="${product.image || ""}"
+                alt="${product.name || "Product"}"
             >
 
-                <img
-                    src="${product.image || ""}"
-                    alt="${product.name}"
-                >
+            <h3>
+                ${product.name || "Product"}
+            </h3>
 
-                <h3>
-                    ${product.name}
-                </h3>
+            <p class="muted">
+                ★ ${product.rating || 0}
+            </p>
 
-                <p class="muted">
-                    ★ ${product.rating || 0}
-                </p>
+            <p>
+                ${product.description || ""}
+            </p>
 
-                <p>
-                    ${product.description || ""}
-                </p>
+            <p class="price">
+                ₹${product.price}
+                <del class="muted">
+                    ₹${product.mrp || ""}
+                </del>
+            </p>
 
-                <p class="price">
-                    ₹${product.price}
-                </p>
+            <button
+                class="primary-btn"
+                onclick="openProduct('${product.id}')"
+            >
+                View Product
+            </button>
 
-                <button
-                    class="primary-btn"
-                    onclick="openProduct('${product.id}')"
-                >
-                    View Product
-                </button>
+            <button
+                onclick="addToCart('${product.id}')"
+            >
+                Add To Cart
+            </button>
 
-                <button
-                    onclick="addToCart('${product.id}')"
-                >
-                    Add To Cart
-                </button>
+            <button
+                class="primary-btn"
+                onclick="buyNow('${product.id}')"
+            >
+                Buy Now
+            </button>
 
-            </article>
+        </article>
 
-        `)
-        .join("");
+    `).join("");
 }
 
 
-/* ===========================================
-   PRODUCT PAGE
-=========================================== */
+// ============================================
+// PRODUCT DETAILS
+// ============================================
 
 function openProduct(id) {
 
     const product =
         products.find(
-            item => item.id === id
+            item => String(item.id) === String(id)
         );
 
-    if (!product) return;
+    if (!product) {
+        alert("Product nahi mila.");
+        return;
+    }
 
     hideSections();
 
-    document
-        .getElementById("productSection")
-        .classList.remove("hidden");
+    const section =
+        document.getElementById("productSection");
 
-    document
-        .getElementById("productDetail")
-        .innerHTML = `
+    const detail =
+        document.getElementById("productDetail");
+
+    if (!section || !detail) return;
+
+    section.classList.remove("hidden");
+
+    detail.innerHTML = `
 
         <div class="product-card">
 
             <img
                 src="${product.image || ""}"
-                alt="${product.name}"
+                alt="${product.name || "Product"}"
             >
 
             <h1>
@@ -316,7 +303,7 @@ function openProduct(id) {
             <p class="price">
                 ₹${product.price}
                 <del class="muted">
-                    ₹${product.mrp}
+                    ₹${product.mrp || ""}
                 </del>
             </p>
 
@@ -325,8 +312,7 @@ function openProduct(id) {
             </p>
 
             <p>
-                Size:
-                S / M / L / XL
+                Size: S / M / L / XL
             </p>
 
             <p>
@@ -334,7 +320,6 @@ function openProduct(id) {
             </p>
 
             <button
-                class="primary-btn"
                 onclick="addToCart('${product.id}')"
             >
                 Add To Cart
@@ -350,45 +335,42 @@ function openProduct(id) {
         </div>
     `;
 
-
     const related =
         products
             .filter(
                 item =>
-                    item.id !== product.id
+                    String(item.id) !== String(product.id)
             )
             .slice(0, 4);
 
+    document.getElementById(
+        "relatedProducts"
+    ).innerHTML = related.map(item => `
 
-    document
-        .getElementById(
-            "relatedProducts"
-        )
-        .innerHTML = related
-        .map(item => `
+        <article class="product-card">
 
-            <article
-                class="product-card"
-                onclick="openProduct('${item.id}')"
+            <img
+                src="${item.image || ""}"
+                alt="${item.name || "Product"}"
             >
 
-                <img
-                    src="${item.image || ""}"
-                    alt="${item.name}"
-                >
+            <h3>
+                ${item.name}
+            </h3>
 
-                <h3>
-                    ${item.name}
-                </h3>
+            <p class="price">
+                ₹${item.price}
+            </p>
 
-                <p class="price">
-                    ₹${item.price}
-                </p>
+            <button
+                onclick="openProduct('${item.id}')"
+            >
+                View Product
+            </button>
 
-            </article>
+        </article>
 
-        `)
-        .join("");
+    `).join("");
 
     window.scrollTo(0, 0);
 }
@@ -396,50 +378,61 @@ function openProduct(id) {
 
 function buyNow(id) {
 
+    const product =
+        products.find(
+            item => String(item.id) === String(id)
+        );
+
+    if (!product) {
+        alert("Product nahi mila.");
+        return;
+    }
+
     addToCart(id);
 
     showCart();
 }
 
 
-/* ===========================================
-   CART
-=========================================== */
+// ============================================
+// CART
+// ============================================
 
 function addToCart(id) {
 
     const product =
         products.find(
-            item => item.id === id
+            item => String(item.id) === String(id)
         );
 
-    if (!product) return;
-
+    if (!product) {
+        alert("Product nahi mila.");
+        return;
+    }
 
     const existing =
         cart.find(
             item =>
-                item.productId === id
+                String(item.productId) === String(id)
         );
-
 
     if (existing) {
 
-        existing.quantity++;
+        existing.quantity =
+            Number(existing.quantity || 0) + 1;
 
     } else {
 
         cart.push({
-            productId: id,
+            productId: String(id),
             quantity: 1
         });
     }
 
-
     saveCart();
 
     alert(
-        "Product cart me add ho gaya."
+        `${product.name} cart me add ho gaya.`
     );
 }
 
@@ -449,7 +442,7 @@ function removeFromCart(id) {
     cart =
         cart.filter(
             item =>
-                item.productId !== id
+                String(item.productId) !== String(id)
         );
 
     saveCart();
@@ -461,25 +454,24 @@ function removeFromCart(id) {
 function renderCart() {
 
     const box =
-        document.getElementById(
-            "cartItems"
-        );
+        document.getElementById("cartItems");
+
+    const totalBox =
+        document.getElementById("cartTotal");
+
+    if (!box || !totalBox) return;
 
     if (!cart.length) {
 
         box.innerHTML =
             "<p class='muted'>Your cart is empty.</p>";
 
-        document.getElementById(
-            "cartTotal"
-        ).textContent = "";
+        totalBox.textContent = "";
 
         return;
     }
 
-
     let total = 0;
-
 
     box.innerHTML =
         cart.map(item => {
@@ -487,17 +479,19 @@ function renderCart() {
             const product =
                 products.find(
                     p =>
-                        p.id ===
-                        item.productId
+                        String(p.id) ===
+                        String(item.productId)
                 );
 
             if (!product) return "";
 
+            const quantity =
+                Number(item.quantity || 1);
 
-            total +=
-                product.price *
-                item.quantity;
+            const itemTotal =
+                product.price * quantity;
 
+            total += itemTotal;
 
             return `
 
@@ -510,7 +504,11 @@ function renderCart() {
                     <p>
                         ₹${product.price}
                         ×
-                        ${item.quantity}
+                        ${quantity}
+                    </p>
+
+                    <p>
+                        Item Total: ₹${itemTotal}
                     </p>
 
                     <button
@@ -525,77 +523,366 @@ function renderCart() {
 
         }).join("");
 
-
-    document.getElementById(
-        "cartTotal"
-    ).textContent =
+    totalBox.textContent =
         "Total: ₹" + total;
 }
 
 
-/* ===========================================
-   CHECKOUT
-=========================================== */
+// ============================================
+// CHECKOUT
+// ============================================
 
 async function checkout() {
 
     if (!cart.length) {
 
-        alert(
-            "Cart empty hai."
-        );
+        alert("Cart empty hai.");
 
         return;
     }
 
-
     alert(
-        "Checkout ke liye customer login/OTP required hoga."
+        "Checkout system backend + customer login ke baad connect hoga."
     );
-
-    // Real order API yahan connect hogi.
 }
 
 
-/* ===========================================
-   OWNER ACCESS
-=========================================== */
+// ============================================
+// OWNER LOGIN
+// ============================================
 
 function ownerAccess() {
 
-    const mobile =
-        prompt(
-            "Registered owner mobile number:"
-        );
+    hideSections();
 
-    if (!mobile) return;
+    document
+        .getElementById("ownerLoginSection")
+        .classList.remove("hidden");
 
+    document.getElementById(
+        "ownerMobile"
+    ).value = OWNER_MOBILE;
 
-    const otp =
-        prompt(
-            "OTP enter karo:"
-        );
+    document.getElementById(
+        "otpBox"
+    ).classList.add("hidden");
 
+    document.getElementById(
+        "ownerLoginMessage"
+    ).textContent = "";
 
-    // DEMO ONLY
-    // Real production OTP backend se verify hoga.
-
-    if (otp === "123456") {
-
-        showOwner();
-
-    } else {
-
-        alert(
-            "Wrong OTP."
-        );
-    }
+    window.scrollTo(0, 0);
 }
 
 
-/* ===========================================
-   SETTINGS
-=========================================== */
+async function requestOwnerOTP() {
+
+    const mobile =
+        document
+            .getElementById("ownerMobile")
+            .value.trim();
+
+    if (mobile !== OWNER_MOBILE) {
+
+        document.getElementById(
+            "ownerLoginMessage"
+        ).textContent =
+            "❌ This mobile number is not registered as owner.";
+
+        return;
+    }
+
+    /*
+       IMPORTANT:
+       Real OTP backend se generate/send hoga.
+       Abhi sirf login UI ready hai.
+    */
+
+    document.getElementById(
+        "otpBox"
+    ).classList.remove("hidden");
+
+    document.getElementById(
+        "ownerLoginMessage"
+    ).textContent =
+        "OTP system backend se connect hone ke baad SMS par aayega.";
+}
+
+
+async function verifyOwnerOTP() {
+
+    alert(
+        "Real OTP verification backend connect karne ke baad activate hoga."
+    );
+}
+
+
+// ============================================
+// OWNER DASHBOARD
+// ============================================
+
+function showOwnerDashboard() {
+
+    hideSections();
+
+    document
+        .getElementById("ownerSection")
+        .classList.remove("hidden");
+
+    window.scrollTo(0, 0);
+}
+
+
+function ownerLogout() {
+
+    hideSections();
+
+    showSettings();
+}
+
+
+function ownerProducts() {
+
+    showOwnerContent(
+        "📦 Products",
+        `
+        <p>Yahan products manage kiye jayenge.</p>
+        <button onclick="addProduct()">➕ Add Product</button>
+        `
+    );
+}
+
+
+function addProduct() {
+
+    showOwnerContent(
+        "➕ Add Product",
+        `
+        <input id="newProductName" placeholder="Product Name">
+        <input id="newProductPrice" type="number" placeholder="Price">
+        <input id="newProductMRP" type="number" placeholder="MRP">
+        <input id="newProductImage" placeholder="Image URL">
+        <textarea id="newProductDescription" placeholder="Description"></textarea>
+
+        <button
+            class="primary-btn"
+            onclick="saveNewProduct()"
+        >
+            Save Product
+        </button>
+        `
+    );
+}
+
+
+function saveNewProduct() {
+
+    const name =
+        document.getElementById(
+            "newProductName"
+        ).value.trim();
+
+    const price =
+        Number(
+            document.getElementById(
+                "newProductPrice"
+            ).value
+        );
+
+    const mrp =
+        Number(
+            document.getElementById(
+                "newProductMRP"
+            ).value
+        );
+
+    const image =
+        document.getElementById(
+            "newProductImage"
+        ).value.trim();
+
+    const description =
+        document.getElementById(
+            "newProductDescription"
+        ).value.trim();
+
+    if (!name || !price) {
+
+        alert("Product name aur price required hai.");
+
+        return;
+    }
+
+    products.push({
+
+        id: Date.now().toString(),
+
+        name,
+
+        price,
+
+        mrp: mrp || price,
+
+        rating: 0,
+
+        image,
+
+        description
+    });
+
+    renderProducts();
+
+    alert(
+        "Product temporarily add ho gaya. Database me permanently save backend connect hone ke baad hoga."
+    );
+}
+
+
+function customerOrders() {
+
+    showOwnerContent(
+        "🛒 Customer Orders",
+        "<p>Customer orders backend connect hone ke baad yahan dikhenge.</p>"
+    );
+}
+
+
+function shipping() {
+
+    showOwnerContent(
+        "🚚 Shipping",
+        "<p>Shipping status backend connect hone ke baad manage hoga.</p>"
+    );
+}
+
+
+function complaintsOwner() {
+
+    showOwnerContent(
+        "📝 Complaints",
+        "<p>Customer complaints backend database se yahan load hongi.</p>"
+    );
+}
+
+
+function customers() {
+
+    showOwnerContent(
+        "👥 Customers",
+        "<p>Customer information backend login system ke baad yahan dikhegi.</p>"
+    );
+}
+
+
+function offers() {
+
+    showOwnerContent(
+        "🏷️ Offers",
+        `
+        <input placeholder="Offer name">
+        <input placeholder="Discount">
+        <button class="primary-btn">
+            Save Offer
+        </button>
+        `
+    );
+}
+
+
+function newArrivals() {
+
+    showOwnerContent(
+        "🆕 New Arrivals",
+        "<p>New arrival products yahan manage honge.</p>"
+    );
+}
+
+
+function ndsCoins() {
+
+    showOwnerContent(
+        "🪙 ND's Coins",
+        `
+        <p>
+            ₹200 eligible purchase = 8 ND's Coins.
+        </p>
+        <p>
+            ₹400 = 16 coins, ₹600 = 24 coins.
+        </p>
+        `
+    );
+}
+
+
+function storeSettings() {
+
+    showOwnerContent(
+        "⚙️ Store Settings",
+        `
+        <input placeholder="Store Name">
+        <input placeholder="Helpline Number">
+        <input placeholder="Store Location">
+
+        <button class="primary-btn">
+            Save Settings
+        </button>
+        `
+    );
+}
+
+
+function sales() {
+
+    showOwnerContent(
+        "📊 Sales",
+        "<p>Sales reports backend/database connect hone ke baad yahan dikhenge.</p>"
+    );
+}
+
+
+function notifications() {
+
+    showOwnerContent(
+        "🔔 Notifications",
+        `
+        <textarea placeholder="Notification message"></textarea>
+
+        <button class="primary-btn">
+            Send Notification
+        </button>
+        `
+    );
+}
+
+
+function showOwnerContent(title, content) {
+
+    const box =
+        document.getElementById("ownerContent");
+
+    if (!box) return;
+
+    box.innerHTML = `
+
+        <div class="dashboard-card">
+
+            <h2>${title}</h2>
+
+            ${content}
+
+        </div>
+
+    `;
+
+    box.scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+// ============================================
+// SETTINGS
+// ============================================
 
 function helpDesk() {
 
@@ -614,9 +901,8 @@ async function complaint() {
 
     if (!message) return;
 
-
     alert(
-        "Complaint submit ho gayi (backend connection ke baad database me save hogi)."
+        "Complaint system backend connect hone ke baad database me save hogi."
     );
 }
 
@@ -655,17 +941,20 @@ function privacy() {
 
 function scrollToProducts() {
 
-    document
-        .getElementById("products")
-        .scrollIntoView({
-            behavior: "smooth"
-        });
+    const productsBox =
+        document.getElementById("products");
+
+    if (!productsBox) return;
+
+    productsBox.scrollIntoView({
+        behavior: "smooth"
+    });
 }
 
 
-/* ===========================================
-   START
-=========================================== */
+// ============================================
+// START
+// ============================================
 
 updateCartCount();
 
