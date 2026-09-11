@@ -57,7 +57,9 @@ let cart = JSON.parse(
     localStorage.getItem("kitkit_cart") || "[]"
 );
 
+
 function saveCart() {
+
     localStorage.setItem(
         "kitkit_cart",
         JSON.stringify(cart)
@@ -66,8 +68,11 @@ function saveCart() {
     updateCartCount();
 }
 
+
 function updateCartCount() {
-    const element = document.getElementById("cartCount");
+
+    const element =
+        document.getElementById("cartCount");
 
     if (!element) return;
 
@@ -86,6 +91,7 @@ function updateCartCount() {
 // ============================================
 
 function hideSections() {
+
     document
         .querySelectorAll("main section")
         .forEach(section => {
@@ -95,6 +101,7 @@ function hideSections() {
 
 
 function showHome() {
+
     hideSections();
 
     document
@@ -108,6 +115,7 @@ function showHome() {
 
 
 function showCart() {
+
     hideSections();
 
     document
@@ -121,6 +129,7 @@ function showCart() {
 
 
 function showSettings() {
+
     hideSections();
 
     document
@@ -136,6 +145,13 @@ function showSettings() {
 // ============================================
 
 async function loadProducts() {
+
+    if (!API_URL) {
+
+        renderProducts();
+
+        return;
+    }
 
     try {
 
@@ -164,6 +180,7 @@ async function loadProducts() {
             "Backend unavailable:",
             error
         );
+
     }
 
     renderProducts();
@@ -365,6 +382,7 @@ function buyNow(id) {
     }
 
     addToCart(id);
+
     showCart();
 }
 
@@ -421,6 +439,7 @@ function removeFromCart(id) {
         );
 
     saveCart();
+
     renderCart();
 }
 
@@ -516,7 +535,7 @@ async function checkout() {
     }
 
     alert(
-        "Checkout system payment/customer details connect hone ke baad complete hoga."
+        "Checkout system payment + customer details ke saath next step me connect hoga."
     );
 }
 
@@ -529,16 +548,19 @@ function ownerAccess() {
 
     hideSections();
 
-    document
-        .getElementById("ownerLoginSection")
-        .classList.remove("hidden");
+    const loginSection =
+        document.getElementById("ownerLoginSection");
 
-    const passwordInput =
+    if (!loginSection) return;
+
+    loginSection.classList.remove("hidden");
+
+    const password =
         document.getElementById("ownerPassword");
 
-    if (passwordInput) {
-        passwordInput.value = "";
-        passwordInput.focus();
+    if (password) {
+        password.value = "";
+        password.focus();
     }
 
     const message =
@@ -552,7 +574,11 @@ function ownerAccess() {
 }
 
 
-async function ownerLogin() {
+// ============================================
+// OWNER PASSWORD LOGIN
+// ============================================
+
+async function ownerPasswordLogin() {
 
     const passwordInput =
         document.getElementById("ownerPassword");
@@ -577,19 +603,16 @@ async function ownerLogin() {
 
     try {
 
-        if (message) {
-            message.textContent =
-                "Checking password...";
-        }
-
         const response =
             await fetch(
                 `${API_URL}/api/owner/login`,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type": "application/json"
                     },
+
                     body: JSON.stringify({
                         password: password
                     })
@@ -601,20 +624,23 @@ async function ownerLogin() {
 
         if (!response.ok || !data.success) {
 
-            throw new Error(
-                data.message || "Invalid password"
-            );
+            if (message) {
+                message.textContent =
+                    "❌ Wrong owner password.";
+            }
+
+            return;
+        }
+
+        if (message) {
+            message.textContent =
+                "✅ Login successful.";
         }
 
         sessionStorage.setItem(
             "kitkit_owner_logged_in",
             "true"
         );
-
-        if (message) {
-            message.textContent =
-                "✅ Owner login successful.";
-        }
 
         setTimeout(() => {
             showOwnerDashboard();
@@ -629,7 +655,7 @@ async function ownerLogin() {
 
         if (message) {
             message.textContent =
-                "❌ Wrong password ya server error.";
+                "❌ Backend se connection nahi ho raha.";
         }
     }
 }
@@ -658,12 +684,13 @@ function ownerLogout() {
     );
 
     hideSections();
+
     showSettings();
 }
 
 
 // ============================================
-// OWNER FUNCTIONS
+// OWNER PRODUCTS
 // ============================================
 
 function ownerProducts() {
@@ -671,23 +698,53 @@ function ownerProducts() {
     showOwnerContent(
         "📦 Products",
         `
-        <p>Yahan products manage kiye jayenge.</p>
-        <button onclick="addProduct()">➕ Add Product</button>
+        <p>
+            Yahan products manage kiye jayenge.
+        </p>
+
+        <button onclick="addProduct()">
+            ➕ Add Product
+        </button>
         `
     );
 }
 
+
+// ============================================
+// ADD PRODUCT
+// ============================================
 
 function addProduct() {
 
     showOwnerContent(
         "➕ Add Product",
         `
-        <input id="newProductName" placeholder="Product Name">
-        <input id="newProductPrice" type="number" placeholder="Price">
-        <input id="newProductMRP" type="number" placeholder="MRP">
-        <input id="newProductImage" placeholder="Image URL">
-        <textarea id="newProductDescription" placeholder="Description"></textarea>
+        <input
+            id="newProductName"
+            placeholder="Product Name"
+        >
+
+        <input
+            id="newProductPrice"
+            type="number"
+            placeholder="Price"
+        >
+
+        <input
+            id="newProductMRP"
+            type="number"
+            placeholder="MRP"
+        >
+
+        <input
+            id="newProductImage"
+            placeholder="Image URL"
+        >
+
+        <textarea
+            id="newProductDescription"
+            placeholder="Description"
+        ></textarea>
 
         <button
             class="primary-btn"
@@ -700,26 +757,44 @@ function addProduct() {
 }
 
 
+// ============================================
+// SAVE PRODUCT
+// ============================================
+
 async function saveNewProduct() {
 
     const name =
-        document.getElementById("newProductName").value.trim();
+        document
+            .getElementById("newProductName")
+            .value
+            .trim();
 
     const price =
         Number(
-            document.getElementById("newProductPrice").value
+            document
+                .getElementById("newProductPrice")
+                .value
         );
 
     const mrp =
         Number(
-            document.getElementById("newProductMRP").value
+            document
+                .getElementById("newProductMRP")
+                .value
         );
 
     const image =
-        document.getElementById("newProductImage").value.trim();
+        document
+            .getElementById("newProductImage")
+            .value
+            .trim();
 
     const description =
-        document.getElementById("newProductDescription").value.trim();
+        document
+            .getElementById("newProductDescription")
+            .value
+            .trim();
+
 
     if (!name || !price) {
 
@@ -730,6 +805,7 @@ async function saveNewProduct() {
         return;
     }
 
+
     try {
 
         const response =
@@ -737,15 +813,17 @@ async function saveNewProduct() {
                 `${API_URL}/api/products`,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type": "application/json"
                     },
+
                     body: JSON.stringify({
-                        name,
-                        price,
-                        image,
-                        description,
-                        category: "",
+                        name: name,
+                        price: price,
+                        image: image,
+                        description: description,
+                        category: "Clothing",
                         stock: 0
                     })
                 }
@@ -754,23 +832,42 @@ async function saveNewProduct() {
         const data =
             await response.json();
 
+
         if (!response.ok || !data.success) {
+
             throw new Error(
                 data.message || "Product save failed"
             );
         }
 
-        await loadProducts();
 
         alert(
             "✅ Product database me save ho gaya."
         );
 
-        ownerProducts();
+
+        await loadProducts();
+
+        showOwnerContent(
+            "📦 Products",
+            `
+            <p>
+                Product successfully added.
+            </p>
+
+            <button onclick="addProduct()">
+                ➕ Add Another Product
+            </button>
+            `
+        );
+
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Add Product Error:",
+            error
+        );
 
         alert(
             "❌ Product save nahi hua."
@@ -779,226 +876,153 @@ async function saveNewProduct() {
 }
 
 
-function customerOrders() {
+// ============================================
+// CUSTOMER ORDERS
+// ============================================
 
-    showOwnerContent(
-        "🛒 Customer Orders",
-        "<p>Customer orders backend se yahan load honge.</p>"
-    );
+async function customerOrders() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/orders`
+            );
+
+        const orders =
+            await response.json();
+
+
+        if (!Array.isArray(orders) || !orders.length) {
+
+            showOwnerContent(
+                "🛒 Customer Orders",
+                "<p>No orders found.</p>"
+            );
+
+            return;
+        }
+
+
+        const html =
+            orders.map(order => `
+
+                <div class="dashboard-card">
+
+                    <h3>
+                        Order #${order.id}
+                    </h3>
+
+                    <p>
+                        Customer:
+                        ${order.customer_name || "Unknown"}
+                    </p>
+
+                    <p>
+                        Mobile:
+                        ${order.customer_mobile || "N/A"}
+                    </p>
+
+                    <p>
+                        Total:
+                        ₹${order.total}
+                    </p>
+
+                    <p>
+                        Status:
+                        ${order.status}
+                    </p>
+
+                    <p>
+                        Address:
+                        ${order.address || "N/A"}
+                    </p>
+
+                </div>
+
+            `).join("");
+
+
+        showOwnerContent(
+            "🛒 Customer Orders",
+            html
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showOwnerContent(
+            "🛒 Customer Orders",
+            "<p>Orders load nahi ho paye.</p>"
+        );
+    }
 }
 
+
+// ============================================
+// SHIPPING
+// ============================================
 
 function shipping() {
 
     showOwnerContent(
         "🚚 Shipping",
-        "<p>Shipping status yahan manage hoga.</p>"
-    );
-}
-
-
-function complaintsOwner() {
-
-    showOwnerContent(
-        "📝 Complaints",
-        "<p>Customer complaints yahan load hongi.</p>"
-    );
-}
-
-
-function customers() {
-
-    showOwnerContent(
-        "👥 Customers",
-        "<p>Customer information yahan dikhegi.</p>"
-    );
-}
-
-
-function offers() {
-
-    showOwnerContent(
-        "🏷️ Offers",
-        `
-        <input placeholder="Offer name">
-        <input placeholder="Discount">
-
-        <button class="primary-btn">
-            Save Offer
-        </button>
-        `
-    );
-}
-
-
-function newArrivals() {
-
-    showOwnerContent(
-        "🆕 New Arrivals",
-        "<p>New arrival products yahan manage honge.</p>"
-    );
-}
-
-
-function ndsCoins() {
-
-    showOwnerContent(
-        "🪙 ND's Coins",
         `
         <p>
-            ₹200 eligible purchase = 8 ND's Coins.
-        </p>
-
-        <p>
-            ₹400 = 16 coins, ₹600 = 24 coins.
+            Shipping status orders ke saath manage kiya jayega.
         </p>
         `
     );
 }
 
 
-function storeSettings() {
-
-    showOwnerContent(
-        "⚙️ Store Settings",
-        `
-        <input placeholder="Store Name">
-        <input placeholder="Helpline Number">
-        <input placeholder="Store Location">
-
-        <button class="primary-btn">
-            Save Settings
-        </button>
-        `
-    );
-}
-
-
-function sales() {
-
-    showOwnerContent(
-        "📊 Sales",
-        "<p>Sales reports yahan dikhenge.</p>"
-    );
-}
-
-
-function notifications() {
-
-    showOwnerContent(
-        "🔔 Notifications",
-        `
-        <textarea placeholder="Notification message"></textarea>
-
-        <button class="primary-btn">
-            Send Notification
-        </button>
-        `
-    );
-}
-
-
-function showOwnerContent(title, content) {
-
-    const box =
-        document.getElementById("ownerContent");
-
-    if (!box) return;
-
-    box.innerHTML = `
-
-        <div class="dashboard-card">
-
-            <h2>${title}</h2>
-
-            ${content}
-
-        </div>
-
-    `;
-
-    box.scrollIntoView({
-        behavior: "smooth"
-    });
-}
-
-
 // ============================================
-// SETTINGS
+// COMPLAINTS
 // ============================================
 
-function helpDesk() {
+async function complaintsOwner() {
 
-    alert(
-        "Helpline backend/store settings se connect hogi."
-    );
-}
+    try {
 
+        const response =
+            await fetch(
+                `${API_URL}/api/complaints`
+            );
 
-async function complaint() {
-
-    const message =
-        prompt(
-            "Complaint / Feedback likho:"
-        );
-
-    if (!message) return;
-
-    alert(
-        "Complaint system backend se connect hoga."
-    );
-}
+        const complaints =
+            await response.json();
 
 
-async function myOrders() {
+        if (
+            !Array.isArray(complaints) ||
+            !complaints.length
+        ) {
 
-    alert(
-        "Customer login ke baad orders yahan load honge."
-    );
-}
+            showOwnerContent(
+                "📝 Complaints",
+                "<p>No complaints found.</p>"
+            );
 
-
-async function storeLocation() {
-
-    alert(
-        "Store location backend se load hogi."
-    );
-}
+            return;
+        }
 
 
-function aboutUs() {
+        const html =
+            complaints.map(item => `
 
-    alert(
-        "Kit Kit Fashion — Clothing Store"
-    );
-}
+                <div class="dashboard-card">
 
+                    <h3>
+                        Complaint #${item.id}
+                    </h3>
 
-function privacy() {
+                    <p>
+                        Name:
+                        ${item.customer_name || "N/A"}
+                    </p>
 
-    alert(
-        "Privacy Policy and Terms of Service."
-    );
-}
-
-
-function scrollToProducts() {
-
-    const productsBox =
-        document.getElementById("products");
-
-    if (!productsBox) return;
-
-    productsBox.scrollIntoView({
-        behavior: "smooth"
-    });
-}
-
-
-// ============================================
-// START
-// ============================================
-
-updateCartCount();
-
-showHome();
+                    <p>
+                        Mobile:
+                        ${item.mobile || "N/A"}
