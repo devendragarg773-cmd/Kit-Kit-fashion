@@ -2,7 +2,7 @@
 // BACKEND
 // ============================================
 
-const API_URL = "https://kit-kit-fashion-0kci.onrender.com";
+const API_URL = "https://kit-kit-fashion-backent.onrender.com";
 
 
 // ============================================
@@ -592,28 +592,128 @@ async function requestOwnerOTP() {
         return;
     }
 
-    /*
-       IMPORTANT:
-       Real OTP backend se generate/send hoga.
-       Abhi sirf login UI ready hai.
-    */
+    try {
 
-    document.getElementById(
-        "otpBox"
-    ).classList.remove("hidden");
+        const response =
+            await fetch(
+                `${API_URL}/api/owner/send-otp`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mobile: mobile
+                    })
+                }
+            );
 
-    document.getElementById(
-        "ownerLoginMessage"
-    ).textContent =
-        "OTP system backend se connect hone ke baad SMS par aayega.";
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "OTP send failed"
+            );
+        }
+
+        document.getElementById(
+            "otpBox"
+        ).classList.remove("hidden");
+
+        document.getElementById(
+            "ownerLoginMessage"
+        ).textContent =
+            "✅ OTP send ho gaya. SMS me mila OTP enter karo.";
+
+    } catch (error) {
+
+        console.error(
+            "Owner OTP Error:",
+            error
+        );
+
+        document.getElementById(
+            "ownerLoginMessage"
+        ).textContent =
+            "❌ OTP send nahi ho paya. Backend/MSG91 settings check karo.";
+    }
 }
 
 
 async function verifyOwnerOTP() {
 
-    alert(
-        "Real OTP verification backend connect karne ke baad activate hoga."
-    );
+    const mobile =
+        document
+            .getElementById("ownerMobile")
+            .value.trim();
+
+    const otp =
+        document
+            .getElementById("ownerOTP")
+            .value.trim();
+
+    if (mobile !== OWNER_MOBILE) {
+
+        alert(
+            "Owner mobile number valid nahi hai."
+        );
+
+        return;
+    }
+
+    if (!otp) {
+
+        alert(
+            "OTP enter karo."
+        );
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/owner/verify-otp`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        mobile: mobile,
+                        otp: otp
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "OTP verification failed"
+            );
+        }
+
+        alert(
+            "✅ Owner login successful."
+        );
+
+        showOwnerDashboard();
+
+    } catch (error) {
+
+        console.error(
+            "OTP Verification Error:",
+            error
+        );
+
+        alert(
+            "❌ OTP verify nahi hua. OTP dobara check karo."
+        );
+    }
 }
 
 
@@ -708,7 +808,9 @@ function saveNewProduct() {
 
     if (!name || !price) {
 
-        alert("Product name aur price required hai.");
+        alert(
+            "Product name aur price required hai."
+        );
 
         return;
     }
