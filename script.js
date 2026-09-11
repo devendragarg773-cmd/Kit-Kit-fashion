@@ -1,8 +1,19 @@
 // ============================================
+// KIT KIT FASHION - FRONTEND SCRIPT
+// ============================================
+
+// ============================================
 // BACKEND
 // ============================================
 
 const API_URL = "https://kit-kit-fashion-backent.onrender.com";
+
+
+// ============================================
+// OWNER
+// ============================================
+
+const OWNER_MOBILE = "9530450140";
 
 
 // ============================================
@@ -71,8 +82,7 @@ function saveCart() {
 
 function updateCartCount() {
 
-    const element =
-        document.getElementById("cartCount");
+    const element = document.getElementById("cartCount");
 
     if (!element) return;
 
@@ -104,9 +114,11 @@ function showHome() {
 
     hideSections();
 
-    document
-        .getElementById("homeSection")
-        .classList.remove("hidden");
+    const home = document.getElementById("homeSection");
+
+    if (home) {
+        home.classList.remove("hidden");
+    }
 
     loadProducts();
 
@@ -118,9 +130,12 @@ function showCart() {
 
     hideSections();
 
-    document
-        .getElementById("cartSection")
-        .classList.remove("hidden");
+    const cartSection =
+        document.getElementById("cartSection");
+
+    if (cartSection) {
+        cartSection.classList.remove("hidden");
+    }
 
     renderCart();
 
@@ -132,9 +147,12 @@ function showSettings() {
 
     hideSections();
 
-    document
-        .getElementById("settingsSection")
-        .classList.remove("hidden");
+    const settings =
+        document.getElementById("settingsSection");
+
+    if (settings) {
+        settings.classList.remove("hidden");
+    }
 
     window.scrollTo(0, 0);
 }
@@ -146,19 +164,11 @@ function showSettings() {
 
 async function loadProducts() {
 
-    if (!API_URL) {
-
-        renderProducts();
-
-        return;
-    }
-
     try {
 
-        const response =
-            await fetch(
-                `${API_URL}/api/products`
-            );
+        const response = await fetch(
+            `${API_URL}/api/products`
+        );
 
         if (!response.ok) {
             throw new Error("Products load failed");
@@ -169,7 +179,7 @@ async function loadProducts() {
 
         if (
             Array.isArray(backendProducts) &&
-            backendProducts.length
+            backendProducts.length > 0
         ) {
             products = backendProducts;
         }
@@ -217,9 +227,11 @@ function renderProducts() {
 
             <p class="price">
                 ₹${product.price}
-                <del class="muted">
-                    ₹${product.mrp || ""}
-                </del>
+                ${
+                    product.mrp
+                    ? `<del class="muted">₹${product.mrp}</del>`
+                    : ""
+                }
             </p>
 
             <button
@@ -260,7 +272,9 @@ function openProduct(id) {
         );
 
     if (!product) {
+
         alert("Product nahi mila.");
+
         return;
     }
 
@@ -295,9 +309,11 @@ function openProduct(id) {
 
             <p class="price">
                 ₹${product.price}
-                <del class="muted">
-                    ₹${product.mrp || ""}
-                </del>
+                ${
+                    product.mrp
+                    ? `<del class="muted">₹${product.mrp}</del>`
+                    : ""
+                }
             </p>
 
             <p>
@@ -326,44 +342,51 @@ function openProduct(id) {
             </button>
 
         </div>
+
     `;
 
     const related =
         products
             .filter(
                 item =>
-                    String(item.id) !== String(product.id)
+                    String(item.id) !==
+                    String(product.id)
             )
             .slice(0, 4);
 
-    document.getElementById(
-        "relatedProducts"
-    ).innerHTML = related.map(item => `
+    const relatedBox =
+        document.getElementById("relatedProducts");
 
-        <article class="product-card">
+    if (relatedBox) {
 
-            <img
-                src="${item.image || ""}"
-                alt="${item.name || "Product"}"
-            >
+        relatedBox.innerHTML =
+            related.map(item => `
 
-            <h3>
-                ${item.name}
-            </h3>
+                <article class="product-card">
 
-            <p class="price">
-                ₹${item.price}
-            </p>
+                    <img
+                        src="${item.image || ""}"
+                        alt="${item.name || "Product"}"
+                    >
 
-            <button
-                onclick="openProduct('${item.id}')"
-            >
-                View Product
-            </button>
+                    <h3>
+                        ${item.name}
+                    </h3>
 
-        </article>
+                    <p class="price">
+                        ₹${item.price}
+                    </p>
 
-    `).join("");
+                    <button
+                        onclick="openProduct('${item.id}')"
+                    >
+                        View Product
+                    </button>
+
+                </article>
+
+            `).join("");
+    }
 
     window.scrollTo(0, 0);
 }
@@ -377,7 +400,9 @@ function buyNow(id) {
         );
 
     if (!product) {
+
         alert("Product nahi mila.");
+
         return;
     }
 
@@ -399,14 +424,17 @@ function addToCart(id) {
         );
 
     if (!product) {
+
         alert("Product nahi mila.");
+
         return;
     }
 
     const existing =
         cart.find(
             item =>
-                String(item.productId) === String(id)
+                String(item.productId) ===
+                String(id)
         );
 
     if (existing) {
@@ -435,7 +463,8 @@ function removeFromCart(id) {
     cart =
         cart.filter(
             item =>
-                String(item.productId) !== String(id)
+                String(item.productId) !==
+                String(id)
         );
 
     saveCart();
@@ -482,7 +511,7 @@ function renderCart() {
                 Number(item.quantity || 1);
 
             const itemTotal =
-                product.price * quantity;
+                Number(product.price) * quantity;
 
             total += itemTotal;
 
@@ -535,13 +564,13 @@ async function checkout() {
     }
 
     alert(
-        "Checkout system payment + customer details ke saath next step me connect hoga."
+        "Checkout system payment/customer details ke saath next step me connect hoga."
     );
 }
 
 
 // ============================================
-// OWNER PASSWORD LOGIN
+// OWNER LOGIN - PASSWORD
 // ============================================
 
 function ownerAccess() {
@@ -549,22 +578,33 @@ function ownerAccess() {
     hideSections();
 
     const loginSection =
-        document.getElementById("ownerLoginSection");
+        document.getElementById(
+            "ownerLoginSection"
+        );
 
     if (!loginSection) return;
 
     loginSection.classList.remove("hidden");
 
+    const mobile =
+        document.getElementById("ownerMobile");
+
     const password =
         document.getElementById("ownerPassword");
 
-    if (password) {
-        password.value = "";
-        password.focus();
+    const message =
+        document.getElementById(
+            "ownerLoginMessage"
+        );
+
+    if (mobile) {
+        mobile.value = OWNER_MOBILE;
+        mobile.readOnly = true;
     }
 
-    const message =
-        document.getElementById("ownerLoginMessage");
+    if (password) {
+        password.value = "";
+    }
 
     if (message) {
         message.textContent = "";
@@ -574,31 +614,60 @@ function ownerAccess() {
 }
 
 
-// ============================================
-// OWNER PASSWORD LOGIN
-// ============================================
+async function ownerLogin() {
 
-async function ownerPasswordLogin() {
+    const mobileElement =
+        document.getElementById("ownerMobile");
 
-    const passwordInput =
+    const passwordElement =
         document.getElementById("ownerPassword");
 
-    const message =
-        document.getElementById("ownerLoginMessage");
+    const messageElement =
+        document.getElementById(
+            "ownerLoginMessage"
+        );
 
-    if (!passwordInput) return;
+    if (!mobileElement || !passwordElement) {
+
+        console.error(
+            "Owner login fields missing in HTML."
+        );
+
+        return;
+    }
+
+    const mobile =
+        mobileElement.value.trim();
 
     const password =
-        passwordInput.value.trim();
+        passwordElement.value;
+
+    if (mobile !== OWNER_MOBILE) {
+
+        if (messageElement) {
+
+            messageElement.textContent =
+                "❌ Owner mobile number valid nahi hai.";
+        }
+
+        return;
+    }
 
     if (!password) {
 
-        if (message) {
-            message.textContent =
+        if (messageElement) {
+
+            messageElement.textContent =
                 "❌ Password enter karo.";
         }
 
         return;
+    }
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            "Checking password...";
     }
 
     try {
@@ -610,10 +679,12 @@ async function ownerPasswordLogin() {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type":
+                            "application/json"
                     },
 
                     body: JSON.stringify({
+                        mobile: mobile,
                         password: password
                     })
                 }
@@ -622,29 +693,40 @@ async function ownerPasswordLogin() {
         const data =
             await response.json();
 
-        if (!response.ok || !data.success) {
+        if (!response.ok) {
 
-            if (message) {
-                message.textContent =
-                    "❌ Wrong owner password.";
+            throw new Error(
+                data.message ||
+                "Login failed"
+            );
+        }
+
+        if (data.success) {
+
+            sessionStorage.setItem(
+                "kitkit_owner_logged_in",
+                "true"
+            );
+
+            if (messageElement) {
+
+                messageElement.textContent =
+                    "✅ Owner login successful.";
             }
 
-            return;
-        }
+            alert(
+                "✅ Owner Login Successful"
+            );
 
-        if (message) {
-            message.textContent =
-                "✅ Login successful.";
-        }
-
-        sessionStorage.setItem(
-            "kitkit_owner_logged_in",
-            "true"
-        );
-
-        setTimeout(() => {
             showOwnerDashboard();
-        }, 300);
+
+        } else {
+
+            throw new Error(
+                data.message ||
+                "Login failed"
+            );
+        }
 
     } catch (error) {
 
@@ -653,9 +735,14 @@ async function ownerPasswordLogin() {
             error
         );
 
-        if (message) {
-            message.textContent =
-                "❌ Backend se connection nahi ho raha.";
+        if (messageElement) {
+
+            messageElement.textContent =
+                "❌ " +
+                (
+                    error.message ||
+                    "Wrong password"
+                );
         }
     }
 }
@@ -669,9 +756,17 @@ function showOwnerDashboard() {
 
     hideSections();
 
-    document
-        .getElementById("ownerSection")
-        .classList.remove("hidden");
+    const ownerSection =
+        document.getElementById(
+            "ownerSection"
+        );
+
+    if (ownerSection) {
+
+        ownerSection.classList.remove(
+            "hidden"
+        );
+    }
 
     window.scrollTo(0, 0);
 }
@@ -693,20 +788,93 @@ function ownerLogout() {
 // OWNER PRODUCTS
 // ============================================
 
-function ownerProducts() {
+async function ownerProducts() {
 
     showOwnerContent(
         "📦 Products",
         `
-        <p>
-            Yahan products manage kiye jayenge.
-        </p>
+        <p>Products backend database se load ho rahe hain.</p>
 
-        <button onclick="addProduct()">
-            ➕ Add Product
+        <button
+            class="primary-btn"
+            onclick="loadOwnerProducts()"
+        >
+            🔄 Load Products
         </button>
+
+        <div id="ownerProductsList"></div>
         `
     );
+
+    loadOwnerProducts();
+}
+
+
+async function loadOwnerProducts() {
+
+    const box =
+        document.getElementById(
+            "ownerProductsList"
+        );
+
+    if (!box) return;
+
+    box.innerHTML =
+        "<p>Loading products...</p>";
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/products`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Products load failed"
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (!Array.isArray(data) || !data.length) {
+
+            box.innerHTML =
+                "<p>No products found.</p>";
+
+            return;
+        }
+
+        box.innerHTML =
+            data.map(product => `
+
+                <div class="cart-item">
+
+                    <h3>
+                        ${product.name}
+                    </h3>
+
+                    <p>
+                        Price: ₹${product.price}
+                    </p>
+
+                    <p>
+                        Stock: ${product.stock || 0}
+                    </p>
+
+                </div>
+
+            `).join("");
+
+    } catch (error) {
+
+        console.error(error);
+
+        box.innerHTML =
+            "<p>Products load nahi ho paye.</p>";
+    }
 }
 
 
@@ -741,6 +909,17 @@ function addProduct() {
             placeholder="Image URL"
         >
 
+        <input
+            id="newProductCategory"
+            placeholder="Category"
+        >
+
+        <input
+            id="newProductStock"
+            type="number"
+            placeholder="Stock"
+        >
+
         <textarea
             id="newProductDescription"
             placeholder="Description"
@@ -757,44 +936,48 @@ function addProduct() {
 }
 
 
-// ============================================
-// SAVE PRODUCT
-// ============================================
-
 async function saveNewProduct() {
 
     const name =
-        document
-            .getElementById("newProductName")
-            .value
-            .trim();
+        document.getElementById(
+            "newProductName"
+        ).value.trim();
 
     const price =
         Number(
-            document
-                .getElementById("newProductPrice")
-                .value
+            document.getElementById(
+                "newProductPrice"
+            ).value
         );
 
     const mrp =
         Number(
-            document
-                .getElementById("newProductMRP")
-                .value
+            document.getElementById(
+                "newProductMRP"
+            ).value
         );
 
     const image =
-        document
-            .getElementById("newProductImage")
-            .value
-            .trim();
+        document.getElementById(
+            "newProductImage"
+        ).value.trim();
+
+    const category =
+        document.getElementById(
+            "newProductCategory"
+        ).value.trim();
+
+    const stock =
+        Number(
+            document.getElementById(
+                "newProductStock"
+            ).value
+        );
 
     const description =
-        document
-            .getElementById("newProductDescription")
-            .value
-            .trim();
-
+        document.getElementById(
+            "newProductDescription"
+        ).value.trim();
 
     if (!name || !price) {
 
@@ -805,7 +988,6 @@ async function saveNewProduct() {
         return;
     }
 
-
     try {
 
         const response =
@@ -815,16 +997,24 @@ async function saveNewProduct() {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type":
+                            "application/json"
                     },
 
                     body: JSON.stringify({
+
                         name: name,
+
                         price: price,
+
                         image: image,
+
                         description: description,
-                        category: "Clothing",
-                        stock: 0
+
+                        category: category,
+
+                        stock: stock
+
                     })
                 }
             );
@@ -832,42 +1022,25 @@ async function saveNewProduct() {
         const data =
             await response.json();
 
-
-        if (!response.ok || !data.success) {
+        if (!response.ok) {
 
             throw new Error(
-                data.message || "Product save failed"
+                data.message ||
+                "Product add failed"
             );
         }
-
 
         alert(
             "✅ Product database me save ho gaya."
         );
 
-
         await loadProducts();
 
-        showOwnerContent(
-            "📦 Products",
-            `
-            <p>
-                Product successfully added.
-            </p>
-
-            <button onclick="addProduct()">
-                ➕ Add Another Product
-            </button>
-            `
-        );
-
+        ownerProducts();
 
     } catch (error) {
 
-        console.error(
-            "Add Product Error:",
-            error
-        );
+        console.error(error);
 
         alert(
             "❌ Product save nahi hua."
@@ -882,6 +1055,28 @@ async function saveNewProduct() {
 
 async function customerOrders() {
 
+    showOwnerContent(
+        "🛒 Customer Orders",
+        `
+        <p>Orders database se load ho rahe hain...</p>
+
+        <div id="ordersList"></div>
+        `
+    );
+
+    loadOrders();
+}
+
+
+async function loadOrders() {
+
+    const box =
+        document.getElementById(
+            "ordersList"
+        );
+
+    if (!box) return;
+
     try {
 
         const response =
@@ -889,25 +1084,28 @@ async function customerOrders() {
                 `${API_URL}/api/orders`
             );
 
+        if (!response.ok) {
+
+            throw new Error(
+                "Orders load failed"
+            );
+        }
+
         const orders =
             await response.json();
 
-
         if (!Array.isArray(orders) || !orders.length) {
 
-            showOwnerContent(
-                "🛒 Customer Orders",
-                "<p>No orders found.</p>"
-            );
+            box.innerHTML =
+                "<p>No orders found.</p>";
 
             return;
         }
 
-
-        const html =
+        box.innerHTML =
             orders.map(order => `
 
-                <div class="dashboard-card">
+                <div class="cart-item">
 
                     <h3>
                         Order #${order.id}
@@ -915,12 +1113,12 @@ async function customerOrders() {
 
                     <p>
                         Customer:
-                        ${order.customer_name || "Unknown"}
+                        ${order.customer_name || "Guest"}
                     </p>
 
                     <p>
                         Mobile:
-                        ${order.customer_mobile || "N/A"}
+                        ${order.customer_mobile || "-"}
                     </p>
 
                     <p>
@@ -933,29 +1131,76 @@ async function customerOrders() {
                         ${order.status}
                     </p>
 
-                    <p>
-                        Address:
-                        ${order.address || "N/A"}
-                    </p>
+                    <button
+                        onclick="updateOrderStatus(${order.id}, 'Shipped')"
+                    >
+                        Mark Shipped
+                    </button>
+
+                    <button
+                        onclick="updateOrderStatus(${order.id}, 'Delivered')"
+                    >
+                        Mark Delivered
+                    </button>
 
                 </div>
 
             `).join("");
 
+    } catch (error) {
 
-        showOwnerContent(
-            "🛒 Customer Orders",
-            html
+        console.error(error);
+
+        box.innerHTML =
+            "<p>Orders load nahi ho paye.</p>";
+    }
+}
+
+
+async function updateOrderStatus(id, status) {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/orders/${id}/status`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        status: status
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Status update failed"
+            );
+        }
+
+        alert(
+            "✅ Order status updated."
         );
 
+        loadOrders();
 
     } catch (error) {
 
         console.error(error);
 
-        showOwnerContent(
-            "🛒 Customer Orders",
-            "<p>Orders load nahi ho paye.</p>"
+        alert(
+            "❌ Status update nahi hua."
         );
     }
 }
@@ -967,22 +1212,37 @@ async function customerOrders() {
 
 function shipping() {
 
-    showOwnerContent(
-        "🚚 Shipping",
-        `
-        <p>
-            Shipping status orders ke saath manage kiya jayega.
-        </p>
-        `
-    );
+    customerOrders();
 }
 
 
 // ============================================
-// COMPLAINTS
+// OWNER COMPLAINTS
 // ============================================
 
 async function complaintsOwner() {
+
+    showOwnerContent(
+        "📝 Complaints",
+        `
+        <p>Complaints database se load ho rahi hain...</p>
+
+        <div id="complaintsList"></div>
+        `
+    );
+
+    loadComplaints();
+}
+
+
+async function loadComplaints() {
+
+    const box =
+        document.getElementById(
+            "complaintsList"
+        );
+
+    if (!box) return;
 
     try {
 
@@ -991,38 +1251,667 @@ async function complaintsOwner() {
                 `${API_URL}/api/complaints`
             );
 
+        if (!response.ok) {
+
+            throw new Error(
+                "Complaints load failed"
+            );
+        }
+
         const complaints =
             await response.json();
-
 
         if (
             !Array.isArray(complaints) ||
             !complaints.length
         ) {
 
-            showOwnerContent(
-                "📝 Complaints",
-                "<p>No complaints found.</p>"
-            );
+            box.innerHTML =
+                "<p>No complaints found.</p>";
 
             return;
         }
 
+        box.innerHTML =
+            complaints.map(complaint => `
 
-        const html =
-            complaints.map(item => `
-
-                <div class="dashboard-card">
+                <div class="cart-item">
 
                     <h3>
-                        Complaint #${item.id}
+                        Complaint #${complaint.id}
                     </h3>
 
                     <p>
                         Name:
-                        ${item.customer_name || "N/A"}
+                        ${complaint.customer_name || "-"}
                     </p>
 
                     <p>
                         Mobile:
-                        ${item.mobile || "N/A"}
+                        ${complaint.mobile || "-"}
+                    </p>
+
+                    <p>
+                        Message:
+                        ${complaint.message}
+                    </p>
+
+                    <p>
+                        Status:
+                        ${complaint.status}
+                    </p>
+
+                </div>
+
+            `).join("");
+
+    } catch (error) {
+
+        console.error(error);
+
+        box.innerHTML =
+            "<p>Complaints load nahi hui.</p>";
+    }
+}
+
+
+// ============================================
+// CUSTOMERS
+// ============================================
+
+async function customers() {
+
+    showOwnerContent(
+        "👥 Customers",
+        `
+        <p>Customers database se load ho rahe hain...</p>
+
+        <div id="customersList"></div>
+        `
+    );
+
+    loadCustomers();
+}
+
+
+async function loadCustomers() {
+
+    const box =
+        document.getElementById(
+            "customersList"
+        );
+
+    if (!box) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/customers`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Customers load failed"
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (!Array.isArray(data) || !data.length) {
+
+            box.innerHTML =
+                "<p>No customers found.</p>";
+
+            return;
+        }
+
+        box.innerHTML =
+            data.map(customer => `
+
+                <div class="cart-item">
+
+                    <h3>
+                        ${customer.name || "Customer"}
+                    </h3>
+
+                    <p>
+                        Mobile:
+                        ${customer.mobile || "-"}
+                    </p>
+
+                    <p>
+                        Email:
+                        ${customer.email || "-"}
+                    </p>
+
+                </div>
+
+            `).join("");
+
+    } catch (error) {
+
+        console.error(error);
+
+        box.innerHTML =
+            "<p>Customers load nahi hue.</p>";
+    }
+}
+
+
+// ============================================
+// OFFERS
+// ============================================
+
+function offers() {
+
+    showOwnerContent(
+        "🏷️ Offers",
+        `
+        <input
+            id="offerName"
+            placeholder="Offer name"
+        >
+
+        <input
+            id="offerDiscount"
+            placeholder="Discount"
+        >
+
+        <button
+            class="primary-btn"
+            onclick="saveOffer()"
+        >
+            Save Offer
+        </button>
+
+        <p id="offerMessage"></p>
+        `
+    );
+}
+
+
+function saveOffer() {
+
+    const name =
+        document.getElementById(
+            "offerName"
+        ).value.trim();
+
+    const discount =
+        document.getElementById(
+            "offerDiscount"
+        ).value.trim();
+
+    if (!name || !discount) {
+
+        alert(
+            "Offer name aur discount required hai."
+        );
+
+        return;
+    }
+
+    localStorage.setItem(
+        "kitkit_offer",
+        JSON.stringify({
+            name: name,
+            discount: discount
+        })
+    );
+
+    document.getElementById(
+        "offerMessage"
+    ).textContent =
+        "✅ Offer saved.";
+}
+
+
+// ============================================
+// NEW ARRIVALS
+// ============================================
+
+function newArrivals() {
+
+    showOwnerContent(
+        "🆕 New Arrivals",
+        `
+        <p>
+            New arrival products ko Products section se manage kar sakte ho.
+        </p>
+
+        <button
+            class="primary-btn"
+            onclick="ownerProducts()"
+        >
+            View Products
+        </button>
+
+        <button
+            onclick="addProduct()"
+        >
+            ➕ Add New Arrival
+        </button>
+        `
+    );
+}
+
+
+// ============================================
+// ND'S COINS
+// ============================================
+
+function ndsCoins() {
+
+    showOwnerContent(
+        "🪙 ND's Coins",
+        `
+        <p>
+            ₹200 eligible purchase = 8 ND's Coins.
+        </p>
+
+        <p>
+            ₹400 = 16 coins
+        </p>
+
+        <p>
+            ₹600 = 24 coins
+        </p>
+        `
+    );
+}
+
+
+// ============================================
+// STORE SETTINGS
+// ============================================
+
+function storeSettings() {
+
+    showOwnerContent(
+        "⚙️ Store Settings",
+        `
+        <input
+            id="storeName"
+            placeholder="Store Name"
+            value="Kit Kit Fashion"
+        >
+
+        <input
+            id="storeHelpline"
+            placeholder="Helpline Number"
+        >
+
+        <input
+            id="storeLocation"
+            placeholder="Store Location"
+        >
+
+        <button
+            class="primary-btn"
+            onclick="saveStoreSettings()"
+        >
+            Save Settings
+        </button>
+
+        <p id="storeSettingsMessage"></p>
+        `
+    );
+}
+
+
+function saveStoreSettings() {
+
+    const name =
+        document.getElementById(
+            "storeName"
+        ).value.trim();
+
+    const helpline =
+        document.getElementById(
+            "storeHelpline"
+        ).value.trim();
+
+    const location =
+        document.getElementById(
+            "storeLocation"
+        ).value.trim();
+
+    localStorage.setItem(
+        "kitkit_store_settings",
+        JSON.stringify({
+            name,
+            helpline,
+            location
+        })
+    );
+
+    document.getElementById(
+        "storeSettingsMessage"
+    ).textContent =
+        "✅ Store settings saved.";
+}
+
+
+// ============================================
+// SALES
+// ============================================
+
+async function sales() {
+
+    showOwnerContent(
+        "📊 Sales",
+        `
+        <p>Sales data load ho raha hai...</p>
+
+        <div id="salesData"></div>
+        `
+    );
+
+    loadSales();
+}
+
+
+async function loadSales() {
+
+    const box =
+        document.getElementById(
+            "salesData"
+        );
+
+    if (!box) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/sales`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Sales load failed"
+            );
+        }
+
+        const data =
+            await response.json();
+
+        box.innerHTML = `
+
+            <div class="cart-item">
+
+                <h3>
+                    📦 Total Orders
+                </h3>
+
+                <p>
+                    ${data.total_orders || 0}
+                </p>
+
+            </div>
+
+            <div class="cart-item">
+
+                <h3>
+                    💰 Total Sales
+                </h3>
+
+                <p>
+                    ₹${data.total_sales || 0}
+                </p>
+
+            </div>
+
+        `;
+
+    } catch (error) {
+
+        console.error(error);
+
+        box.innerHTML =
+            "<p>Sales data load nahi hua.</p>";
+    }
+}
+
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+function notifications() {
+
+    showOwnerContent(
+        "🔔 Notifications",
+        `
+        <textarea
+            id="notificationMessage"
+            placeholder="Notification message"
+        ></textarea>
+
+        <button
+            class="primary-btn"
+            onclick="saveNotification()"
+        >
+            Save Notification
+        </button>
+
+        <p id="notificationStatus"></p>
+        `
+    );
+}
+
+
+function saveNotification() {
+
+    const message =
+        document.getElementById(
+            "notificationMessage"
+        ).value.trim();
+
+    if (!message) {
+
+        alert(
+            "Notification message likho."
+        );
+
+        return;
+    }
+
+    localStorage.setItem(
+        "kitkit_notification",
+        message
+    );
+
+    document.getElementById(
+        "notificationStatus"
+    ).textContent =
+        "✅ Notification saved.";
+}
+
+
+// ============================================
+// OWNER CONTENT
+// ============================================
+
+function showOwnerContent(title, content) {
+
+    const box =
+        document.getElementById(
+            "ownerContent"
+        );
+
+    if (!box) return;
+
+    box.innerHTML = `
+
+        <div class="dashboard-card">
+
+            <h2>
+                ${title}
+            </h2>
+
+            ${content}
+
+        </div>
+
+    `;
+
+    box.scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+// ============================================
+// CUSTOMER SETTINGS
+// ============================================
+
+function helpDesk() {
+
+    alert(
+        "Kit Kit Fashion Helpline: 9530450140"
+    );
+}
+
+
+async function complaint() {
+
+    const message =
+        prompt(
+            "Complaint / Feedback likho:"
+        );
+
+    if (!message) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/complaints`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        customer_name:
+                            "Website Customer",
+
+                        mobile: "",
+
+                        message: message
+
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Complaint failed"
+            );
+        }
+
+        alert(
+            "✅ Complaint successfully submit ho gayi."
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "❌ Complaint submit nahi hui."
+        );
+    }
+}
+
+
+async function myOrders() {
+
+    alert(
+        "Customer order history system next step me connect hoga."
+    );
+}
+
+
+async function storeLocation() {
+
+    const saved =
+        localStorage.getItem(
+            "kitkit_store_settings"
+        );
+
+    if (saved) {
+
+        const settings =
+            JSON.parse(saved);
+
+        alert(
+            "📍 Store Location: " +
+            (settings.location || "Not set")
+        );
+
+    } else {
+
+        alert(
+            "📍 Store location abhi set nahi hai."
+        );
+    }
+}
+
+
+function aboutUs() {
+
+    alert(
+        "Kit Kit Fashion — Clothing Store"
+    );
+}
+
+
+function privacy() {
+
+    alert(
+        "Privacy Policy and Terms of Service."
+    );
+}
+
+
+// ============================================
+// SCROLL
+// ============================================
+
+function scrollToProducts() {
+
+    const productsBox =
+        document.getElementById(
+            "products"
+        );
+
+    if (!productsBox) return;
+
+    productsBox.scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+// ============================================
+// START
+// ============================================
+
+updateCartCount();
+
+showHome();
