@@ -6,13 +6,6 @@ const API_URL = "https://kit-kit-fashion-backent.onrender.com";
 
 
 // ============================================
-// OWNER
-// ============================================
-
-const OWNER_MOBILE = "9530450140";
-
-
-// ============================================
 // PRODUCTS
 // ============================================
 
@@ -64,9 +57,7 @@ let cart = JSON.parse(
     localStorage.getItem("kitkit_cart") || "[]"
 );
 
-
 function saveCart() {
-
     localStorage.setItem(
         "kitkit_cart",
         JSON.stringify(cart)
@@ -75,11 +66,8 @@ function saveCart() {
     updateCartCount();
 }
 
-
 function updateCartCount() {
-
-    const element =
-        document.getElementById("cartCount");
+    const element = document.getElementById("cartCount");
 
     if (!element) return;
 
@@ -98,7 +86,6 @@ function updateCartCount() {
 // ============================================
 
 function hideSections() {
-
     document
         .querySelectorAll("main section")
         .forEach(section => {
@@ -108,7 +95,6 @@ function hideSections() {
 
 
 function showHome() {
-
     hideSections();
 
     document
@@ -122,7 +108,6 @@ function showHome() {
 
 
 function showCart() {
-
     hideSections();
 
     document
@@ -136,7 +121,6 @@ function showCart() {
 
 
 function showSettings() {
-
     hideSections();
 
     document
@@ -152,13 +136,6 @@ function showSettings() {
 // ============================================
 
 async function loadProducts() {
-
-    if (!API_URL) {
-
-        renderProducts();
-
-        return;
-    }
 
     try {
 
@@ -187,7 +164,6 @@ async function loadProducts() {
             "Backend unavailable:",
             error
         );
-
     }
 
     renderProducts();
@@ -389,7 +365,6 @@ function buyNow(id) {
     }
 
     addToCart(id);
-
     showCart();
 }
 
@@ -446,7 +421,6 @@ function removeFromCart(id) {
         );
 
     saveCart();
-
     renderCart();
 }
 
@@ -542,13 +516,13 @@ async function checkout() {
     }
 
     alert(
-        "Checkout system backend + customer login ke baad connect hoga."
+        "Checkout system payment/customer details connect hone ke baad complete hoga."
     );
 }
 
 
 // ============================================
-// OWNER LOGIN
+// OWNER PASSWORD LOGIN
 // ============================================
 
 function ownerAccess() {
@@ -559,51 +533,65 @@ function ownerAccess() {
         .getElementById("ownerLoginSection")
         .classList.remove("hidden");
 
-    document.getElementById(
-        "ownerMobile"
-    ).value = OWNER_MOBILE;
+    const passwordInput =
+        document.getElementById("ownerPassword");
 
-    document.getElementById(
-        "otpBox"
-    ).classList.add("hidden");
+    if (passwordInput) {
+        passwordInput.value = "";
+        passwordInput.focus();
+    }
 
-    document.getElementById(
-        "ownerLoginMessage"
-    ).textContent = "";
+    const message =
+        document.getElementById("ownerLoginMessage");
+
+    if (message) {
+        message.textContent = "";
+    }
 
     window.scrollTo(0, 0);
 }
 
 
-async function requestOwnerOTP() {
+async function ownerLogin() {
 
-    const mobile =
-        document
-            .getElementById("ownerMobile")
-            .value.trim();
+    const passwordInput =
+        document.getElementById("ownerPassword");
 
-    if (mobile !== OWNER_MOBILE) {
+    const message =
+        document.getElementById("ownerLoginMessage");
 
-        document.getElementById(
-            "ownerLoginMessage"
-        ).textContent =
-            "❌ This mobile number is not registered as owner.";
+    if (!passwordInput) return;
+
+    const password =
+        passwordInput.value.trim();
+
+    if (!password) {
+
+        if (message) {
+            message.textContent =
+                "❌ Password enter karo.";
+        }
 
         return;
     }
 
     try {
 
+        if (message) {
+            message.textContent =
+                "Checking password...";
+        }
+
         const response =
             await fetch(
-                `${API_URL}/api/owner/send-otp`,
+                `${API_URL}/api/owner/login`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        mobile: mobile
+                        password: password
                     })
                 }
             );
@@ -611,108 +599,38 @@ async function requestOwnerOTP() {
         const data =
             await response.json();
 
-        if (!response.ok) {
+        if (!response.ok || !data.success) {
+
             throw new Error(
-                data.message || "OTP send failed"
+                data.message || "Invalid password"
             );
         }
 
-        document.getElementById(
-            "otpBox"
-        ).classList.remove("hidden");
+        sessionStorage.setItem(
+            "kitkit_owner_logged_in",
+            "true"
+        );
 
-        document.getElementById(
-            "ownerLoginMessage"
-        ).textContent =
-            "✅ OTP send ho gaya. SMS me mila OTP enter karo.";
+        if (message) {
+            message.textContent =
+                "✅ Owner login successful.";
+        }
+
+        setTimeout(() => {
+            showOwnerDashboard();
+        }, 300);
 
     } catch (error) {
 
         console.error(
-            "Owner OTP Error:",
+            "Owner Login Error:",
             error
         );
 
-        document.getElementById(
-            "ownerLoginMessage"
-        ).textContent =
-            "❌ OTP send nahi ho paya. Backend/MSG91 settings check karo.";
-    }
-}
-
-
-async function verifyOwnerOTP() {
-
-    const mobile =
-        document
-            .getElementById("ownerMobile")
-            .value.trim();
-
-    const otp =
-        document
-            .getElementById("ownerOTP")
-            .value.trim();
-
-    if (mobile !== OWNER_MOBILE) {
-
-        alert(
-            "Owner mobile number valid nahi hai."
-        );
-
-        return;
-    }
-
-    if (!otp) {
-
-        alert(
-            "OTP enter karo."
-        );
-
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_URL}/api/owner/verify-otp`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        mobile: mobile,
-                        otp: otp
-                    })
-                }
-            );
-
-        const data =
-            await response.json();
-
-        if (!response.ok) {
-            throw new Error(
-                data.message || "OTP verification failed"
-            );
+        if (message) {
+            message.textContent =
+                "❌ Wrong password ya server error.";
         }
-
-        alert(
-            "✅ Owner login successful."
-        );
-
-        showOwnerDashboard();
-
-    } catch (error) {
-
-        console.error(
-            "OTP Verification Error:",
-            error
-        );
-
-        alert(
-            "❌ OTP verify nahi hua. OTP dobara check karo."
-        );
     }
 }
 
@@ -735,11 +653,18 @@ function showOwnerDashboard() {
 
 function ownerLogout() {
 
-    hideSections();
+    sessionStorage.removeItem(
+        "kitkit_owner_logged_in"
+    );
 
+    hideSections();
     showSettings();
 }
 
+
+// ============================================
+// OWNER FUNCTIONS
+// ============================================
 
 function ownerProducts() {
 
@@ -775,36 +700,26 @@ function addProduct() {
 }
 
 
-function saveNewProduct() {
+async function saveNewProduct() {
 
     const name =
-        document.getElementById(
-            "newProductName"
-        ).value.trim();
+        document.getElementById("newProductName").value.trim();
 
     const price =
         Number(
-            document.getElementById(
-                "newProductPrice"
-            ).value
+            document.getElementById("newProductPrice").value
         );
 
     const mrp =
         Number(
-            document.getElementById(
-                "newProductMRP"
-            ).value
+            document.getElementById("newProductMRP").value
         );
 
     const image =
-        document.getElementById(
-            "newProductImage"
-        ).value.trim();
+        document.getElementById("newProductImage").value.trim();
 
     const description =
-        document.getElementById(
-            "newProductDescription"
-        ).value.trim();
+        document.getElementById("newProductDescription").value.trim();
 
     if (!name || !price) {
 
@@ -815,28 +730,52 @@ function saveNewProduct() {
         return;
     }
 
-    products.push({
+    try {
 
-        id: Date.now().toString(),
+        const response =
+            await fetch(
+                `${API_URL}/api/products`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        price,
+                        image,
+                        description,
+                        category: "",
+                        stock: 0
+                    })
+                }
+            );
 
-        name,
+        const data =
+            await response.json();
 
-        price,
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || "Product save failed"
+            );
+        }
 
-        mrp: mrp || price,
+        await loadProducts();
 
-        rating: 0,
+        alert(
+            "✅ Product database me save ho gaya."
+        );
 
-        image,
+        ownerProducts();
 
-        description
-    });
+    } catch (error) {
 
-    renderProducts();
+        console.error(error);
 
-    alert(
-        "Product temporarily add ho gaya. Database me permanently save backend connect hone ke baad hoga."
-    );
+        alert(
+            "❌ Product save nahi hua."
+        );
+    }
 }
 
 
@@ -844,7 +783,7 @@ function customerOrders() {
 
     showOwnerContent(
         "🛒 Customer Orders",
-        "<p>Customer orders backend connect hone ke baad yahan dikhenge.</p>"
+        "<p>Customer orders backend se yahan load honge.</p>"
     );
 }
 
@@ -853,7 +792,7 @@ function shipping() {
 
     showOwnerContent(
         "🚚 Shipping",
-        "<p>Shipping status backend connect hone ke baad manage hoga.</p>"
+        "<p>Shipping status yahan manage hoga.</p>"
     );
 }
 
@@ -862,7 +801,7 @@ function complaintsOwner() {
 
     showOwnerContent(
         "📝 Complaints",
-        "<p>Customer complaints backend database se yahan load hongi.</p>"
+        "<p>Customer complaints yahan load hongi.</p>"
     );
 }
 
@@ -871,7 +810,7 @@ function customers() {
 
     showOwnerContent(
         "👥 Customers",
-        "<p>Customer information backend login system ke baad yahan dikhegi.</p>"
+        "<p>Customer information yahan dikhegi.</p>"
     );
 }
 
@@ -883,6 +822,7 @@ function offers() {
         `
         <input placeholder="Offer name">
         <input placeholder="Discount">
+
         <button class="primary-btn">
             Save Offer
         </button>
@@ -908,6 +848,7 @@ function ndsCoins() {
         <p>
             ₹200 eligible purchase = 8 ND's Coins.
         </p>
+
         <p>
             ₹400 = 16 coins, ₹600 = 24 coins.
         </p>
@@ -937,7 +878,7 @@ function sales() {
 
     showOwnerContent(
         "📊 Sales",
-        "<p>Sales reports backend/database connect hone ke baad yahan dikhenge.</p>"
+        "<p>Sales reports yahan dikhenge.</p>"
     );
 }
 
@@ -1004,7 +945,7 @@ async function complaint() {
     if (!message) return;
 
     alert(
-        "Complaint system backend connect hone ke baad database me save hogi."
+        "Complaint system backend se connect hoga."
     );
 }
 
