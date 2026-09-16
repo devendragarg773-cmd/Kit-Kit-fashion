@@ -933,4 +933,10 @@ function scrollToProducts() {
 // ============================================
 
 updateCartCount();
-showHome();
+showHome();process.on("uncaughtException", (err) => {
+    console.error("UNCAUGHT ERROR:", err);
+});
+
+process.on("unhandledRejection", (err) => {
+    console.error("UNHANDLED REJECTION:", err);
+});
