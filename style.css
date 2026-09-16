@@ -9,8 +9,14 @@ html {
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #071426;
-    color: white;
+
+    background:
+        radial-gradient(circle at top right, #173b63 0%, transparent 35%),
+        radial-gradient(circle at bottom left, #102d4d 0%, transparent 30%),
+        #071426;
+
+    color: #fff;
+    min-height: 100vh;
 }
 
 
@@ -19,15 +25,18 @@ body {
 .header {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    padding: 15px 5%;
+    gap: 15px;
+    padding: 14px 5%;
 
-    background: #0b1d35;
+    background: rgba(11, 29, 53, .94);
+    backdrop-filter: blur(12px);
+
     border-bottom: 1px solid #294563;
 }
 
@@ -37,10 +46,12 @@ body {
 
     font-size: 21px;
     font-weight: 900;
+
+    white-space: nowrap;
 }
 
 .logo span {
-    color: #ff9d18;
+    color: #ffb020;
 }
 
 
@@ -48,12 +59,13 @@ body {
 
 nav {
     display: flex;
-    gap: 7px;
+    gap: 8px;
 }
 
-nav button {
+nav button,
+.back-btn {
     border: 1px solid #31506f;
-    border-radius: 9px;
+    border-radius: 10px;
 
     padding: 9px 13px;
 
@@ -61,13 +73,21 @@ nav button {
     color: white;
 
     cursor: pointer;
+
+    transition: .25s;
+}
+
+nav button:hover,
+.back-btn:hover {
+    border-color: #ffb020;
+    box-shadow: 0 0 12px rgba(255,176,32,.3);
 }
 
 
 /* MAIN */
 
 main {
-    max-width: 1150px;
+    width: min(1150px, 100%);
     margin: auto;
 
     padding: 25px 5%;
@@ -77,39 +97,47 @@ main {
 /* HERO */
 
 .hero {
-    min-height: 350px;
+    min-height: 400px;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
 
-    padding: 45px;
+    padding: clamp(25px, 6vw, 55px);
 
-    border-radius: 25px;
+    border-radius: 28px;
 
     background:
         linear-gradient(
             135deg,
-            #12345a,
-            #08192e
+            rgba(25,72,116,.95),
+            rgba(8,25,46,.98)
         );
 
+    border: 1px solid #31506f;
+
     box-shadow:
-        0 20px 60px rgba(0,0,0,.35);
+        0 20px 70px rgba(0,0,0,.35);
 }
 
 .small-title {
-    color: #ff9d18;
+    color: #ffb020;
     font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
 }
 
 .hero h1 {
-    max-width: 700px;
+    max-width: 750px;
 
     margin: 8px 0;
 
-    font-size: clamp(38px, 7vw, 70px);
+    font-size: clamp(40px, 7vw, 72px);
+    line-height: 1.05;
+}
+
+.hero p:not(.small-title) {
+    color: #c4d3e2;
+    font-size: 18px;
 }
 
 
@@ -125,24 +153,21 @@ main {
     border: 0;
     border-radius: 12px;
 
-    background: #ff9d18;
+    background: #ffb020;
     color: #111;
 
     font-weight: bold;
-
     cursor: pointer;
+
+    transition: .25s;
 }
 
-.back-btn {
-    padding: 10px 15px;
+.primary-btn:hover {
+    transform: translateY(-2px);
 
-    border: 1px solid #31506f;
-    border-radius: 10px;
-
-    background: #122943;
-    color: white;
-
-    cursor: pointer;
+    box-shadow:
+        0 0 12px #ffb020,
+        0 0 30px rgba(255,176,32,.4);
 }
 
 
@@ -163,19 +188,23 @@ main {
 .product-card {
     overflow: hidden;
 
-    background: #0d223b;
+    background: rgba(13,34,59,.92);
 
     border: 1px solid #294766;
-
     border-radius: 18px;
 
     padding: 14px;
 
-    transition: transform .2s ease;
+    transition: .25s;
 }
 
 .product-card:hover {
     transform: translateY(-5px);
+
+    border-color: #ffb020;
+
+    box-shadow:
+        0 0 20px rgba(255,176,32,.15);
 }
 
 .product-card img {
@@ -200,6 +229,10 @@ main {
     color: #9db0c5;
 }
 
+.product-card button {
+    margin: 5px 3px 0 0;
+}
+
 
 /* SETTINGS */
 
@@ -212,25 +245,104 @@ main {
             minmax(220px, 1fr)
         );
 
-    gap: 14px;
+    gap: 15px;
 }
 
 .settings-grid button {
-    padding: 20px;
+    min-height: 75px;
+
+    padding: 18px;
 
     text-align: left;
 
     border: 1px solid #31506f;
-    border-radius: 14px;
+    border-radius: 15px;
 
     background: #102943;
     color: white;
 
     cursor: pointer;
+
+    transition: .25s;
+}
+
+.settings-grid button:hover {
+    transform: translateY(-3px);
+
+    border-color: #ffb020;
+
+    box-shadow:
+        0 0 18px rgba(255,176,32,.25);
+}
+
+
+/* GLOWING OWNER ACCESS */
+
+.owner-access-btn {
+    position: relative;
+    overflow: hidden;
+
+    border-color: #ffb020 !important;
+
+    box-shadow:
+        0 0 8px rgba(255,176,32,.4),
+        0 0 22px rgba(255,176,32,.2);
+
+    animation: ownerGlow 2s infinite alternate;
+}
+
+.owner-access-btn span {
+    font-size: 25px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.owner-access-btn strong {
+    display: block;
+    color: #ffcf66;
+}
+
+.owner-access-btn small {
+    display: block;
+    margin-top: 5px;
+    color: #9db0c5;
+}
+
+@keyframes ownerGlow {
+    from {
+        box-shadow:
+            0 0 7px rgba(255,176,32,.3),
+            0 0 15px rgba(255,176,32,.1);
+    }
+
+    to {
+        box-shadow:
+            0 0 15px rgba(255,176,32,.7),
+            0 0 35px rgba(255,176,32,.3);
+    }
 }
 
 
 /* OWNER */
+
+.owner-title {
+    margin: 25px 0;
+}
+
+.owner-title p {
+    color: #ffb020;
+    letter-spacing: 3px;
+    font-weight: bold;
+}
+
+.owner-title h2 {
+    margin: 5px 0;
+    font-size: clamp(30px, 6vw, 48px);
+}
+
+.owner-title span {
+    color: #9db0c5;
+}
 
 .owner-grid {
     display: grid;
@@ -245,15 +357,101 @@ main {
 }
 
 .dashboard-card {
+    position: relative;
+
+    min-height: 190px;
+
     padding: 22px;
+
+    text-align: left;
 
     border: 1px solid #31506f;
     border-radius: 18px;
 
-    background: #0d223b;
+    background: linear-gradient(
+        145deg,
+        #102943,
+        #0b2038
+    );
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: .3s;
 
     box-shadow:
         0 10px 35px rgba(0,0,0,.2);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-7px) scale(1.02);
+
+    border-color: #ffb020;
+
+    box-shadow:
+        0 0 12px rgba(255,176,32,.45),
+        0 0 30px rgba(255,176,32,.15);
+}
+
+.card-icon {
+    font-size: 32px;
+}
+
+.dashboard-card h3 {
+    margin-bottom: 8px;
+    color: #ffcf66;
+}
+
+.dashboard-card p {
+    color: #9db0c5;
+}
+
+
+/* OWNER PAGES */
+
+.owner-page-box {
+    margin-top: 25px;
+
+    padding: clamp(20px, 5vw, 35px);
+
+    background: #0d223b;
+
+    border: 1px solid #31506f;
+    border-radius: 20px;
+
+    box-shadow:
+        0 0 30px rgba(255,176,32,.08);
+}
+
+.owner-page-box h1 {
+    color: #ffb020;
+}
+
+.owner-form {
+    display: grid;
+    gap: 12px;
+
+    max-width: 600px;
+}
+
+.owner-form input,
+.owner-form textarea,
+.owner-form select {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 1px solid #31506f;
+    border-radius: 10px;
+
+    background: #071426;
+    color: white;
+}
+
+.owner-form textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
 
@@ -282,7 +480,7 @@ main {
 /* HIDDEN */
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 
@@ -302,21 +500,68 @@ footer {
 @media (max-width: 650px) {
 
     .header {
-        align-items: flex-start;
-        gap: 10px;
+        position: sticky;
+
+        padding: 12px 4%;
+
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .logo {
+        text-align: center;
     }
 
     nav {
-        flex-wrap: wrap;
-        justify-content: flex-end;
+        width: 100%;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+
+    nav button {
+        width: 100%;
+        padding: 9px 5px;
+
+        font-size: 13px;
+    }
+
+    main {
+        padding: 18px 4%;
     }
 
     .hero {
-        padding: 28px;
+        min-height: 380px;
+        padding: 28px 22px;
+
+        border-radius: 20px;
     }
 
     .hero h1 {
         font-size: 40px;
     }
 
+    .hero p:not(.small-title) {
+        font-size: 15px;
+    }
+
+    .product-grid,
+    .owner-grid,
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-card img {
+        height: 260px;
+    }
+
+    .dashboard-card {
+        min-height: 155px;
+    }
+
+    .owner-page-box {
+        padding: 20px 16px;
+    }
 }
