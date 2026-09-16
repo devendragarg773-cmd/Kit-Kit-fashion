@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,150 +12,89 @@
 <body>
 
 <header class="header">
-
-    <a href="/" class="logo">
+    <a href="#" class="logo" onclick="showHome()">
         KIT KIT <span>FASHION</span>
     </a>
 
     <nav>
-
-        <button onclick="showHome()">
-            Home
-        </button>
-
+        <button onclick="showHome()">Home</button>
         <button onclick="showCart()">
             Cart (<span id="cartCount">0</span>)
         </button>
-
-        <button onclick="showSettings()">
-            Settings
-        </button>
-
+        <button onclick="showSettings()">Settings</button>
     </nav>
-
 </header>
 
 
 <main>
 
-    <!-- ================= HOME ================= -->
-
+    <!-- HOME -->
     <section id="homeSection">
 
         <div class="hero">
+            <p class="small-title">KIT KIT FASHION</p>
 
-            <p class="small-title">
-                KIT KIT FASHION
-            </p>
-
-            <h1>
-                Style That Feels Like You.
-            </h1>
+            <h1>Style That Feels Like You.</h1>
 
             <p>
                 Discover stylish clothing for everyday life.
             </p>
 
-            <button
-                class="primary-btn"
-                onclick="scrollToProducts()"
-            >
+            <button class="primary-btn" onclick="scrollToProducts()">
                 Shop Now
             </button>
-
         </div>
 
+        <h2>Clothing Collection</h2>
 
-        <h2>
-            Clothing Collection
-        </h2>
-
-        <div
-            id="products"
-            class="product-grid"
-        ></div>
+        <div id="products" class="product-grid"></div>
 
     </section>
 
 
-    <!-- ================= PRODUCT DETAILS ================= -->
+    <!-- PRODUCT -->
+    <section id="productSection" class="hidden">
 
-    <section
-        id="productSection"
-        class="hidden"
-    >
-
-        <button
-            class="back-btn"
-            onclick="showHome()"
-        >
-            ← Back
-        </button>
+        <button class="back-btn" onclick="showHome()">← Back</button>
 
         <div id="productDetail"></div>
 
-        <h2>
-            You May Also Like
-        </h2>
+        <h2>You May Also Like</h2>
 
-        <div
-            id="relatedProducts"
-            class="product-grid"
-        ></div>
+        <div id="relatedProducts" class="product-grid"></div>
 
     </section>
 
 
-    <!-- ================= CART ================= -->
+    <!-- CART -->
+    <section id="cartSection" class="hidden">
 
-    <section
-        id="cartSection"
-        class="hidden"
-    >
+        <button class="back-btn" onclick="showHome()">← Home</button>
 
-        <button
-            class="back-btn"
-            onclick="showHome()"
-        >
-            ← Continue Shopping
-        </button>
-
-        <h2>
-            My Cart
-        </h2>
+        <h2>My Cart</h2>
 
         <div id="cartItems"></div>
 
-        <div
-            id="cartTotal"
-            class="cart-total"
-        ></div>
+        <div id="cartTotal" class="cart-total"></div>
 
-        <button
-            class="primary-btn"
-            onclick="checkout()"
-        >
+        <button class="primary-btn" onclick="checkout()">
             Proceed to Checkout
         </button>
 
     </section>
 
 
-    <!-- ================= SETTINGS ================= -->
+    <!-- SETTINGS -->
+    <section id="settingsSection" class="hidden">
 
-    <section
-        id="settingsSection"
-        class="hidden"
-    >
-
-        <h2>
-            Settings
-        </h2>
+        <h2>Settings</h2>
 
         <div class="settings-grid">
 
-            <button onclick="ownerAccess()">
-                🔐 Owner Access
+            <button class="owner-access-btn" onclick="ownerAccess()">
+                <span>🔐</span>
+                <strong>Owner Access</strong>
+                <small>Open Owner Dashboard</small>
             </button>
 
             <button onclick="helpDesk()">
@@ -188,324 +126,118 @@
     </section>
 
 
-    <!-- ================= OWNER PASSWORD LOGIN ================= -->
+    <!-- OWNER DASHBOARD -->
+    <section id="ownerSection" class="hidden">
 
-    <section
-        id="ownerLoginSection"
-        class="hidden"
-    >
-
-        <button
-            class="back-btn"
-            onclick="showSettings()"
-        >
+        <button class="back-btn" onclick="showSettings()">
             ← Back
         </button>
 
+        <div class="owner-title">
+            <p>OWNER PANEL</p>
+            <h2>Owner Dashboard</h2>
+            <span>Manage your complete fashion store</span>
+        </div>
 
-        <div class="login-box">
+        <div class="owner-grid">
 
-            <h2>
-                Owner Login
-            </h2>
-
-            <p>
-                Enter owner password to continue.
-            </p>
-
-
-            <input
-                type="password"
-                id="ownerPassword"
-                placeholder="Enter Owner Password"
-                autocomplete="current-password"
-            >
-
-
-            <!-- FIXED: ownerLogin() -->
-
-            <button
-                class="primary-btn"
-                onclick="ownerLogin()"
-            >
-                🔐 Login
+            <button class="dashboard-card" onclick="openOwnerPage('products')">
+                <span class="card-icon">👕</span>
+                <h3>Products</h3>
+                <p>Add, edit and manage clothing.</p>
             </button>
 
+            <button class="dashboard-card" onclick="openOwnerPage('addProduct')">
+                <span class="card-icon">➕</span>
+                <h3>Add Product</h3>
+                <p>Add new clothes and stock.</p>
+            </button>
 
-            <p
-                id="ownerLoginMessage"
-                class="muted"
-            ></p>
+            <button class="dashboard-card" onclick="openOwnerPage('orders')">
+                <span class="card-icon">📦</span>
+                <h3>Customer Orders</h3>
+                <p>Manage customer orders.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('shipping')">
+                <span class="card-icon">🚚</span>
+                <h3>Shipping</h3>
+                <p>Manage shipping status.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('complaints')">
+                <span class="card-icon">📝</span>
+                <h3>Complaints</h3>
+                <p>View customer complaints.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('customers')">
+                <span class="card-icon">👥</span>
+                <h3>Customers</h3>
+                <p>View customer information.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('offers')">
+                <span class="card-icon">🏷️</span>
+                <h3>Offers</h3>
+                <p>Manage store offers.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('arrivals')">
+                <span class="card-icon">✨</span>
+                <h3>New Arrivals</h3>
+                <p>Manage new clothing.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('coins')">
+                <span class="card-icon">🪙</span>
+                <h3>ND's Coins</h3>
+                <p>₹200 purchase = 8 coins.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('storeSettings')">
+                <span class="card-icon">⚙️</span>
+                <h3>Store Settings</h3>
+                <p>Manage shop details.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('sales')">
+                <span class="card-icon">📊</span>
+                <h3>Sales</h3>
+                <p>View sales information.</p>
+            </button>
+
+            <button class="dashboard-card" onclick="openOwnerPage('notifications')">
+                <span class="card-icon">🔔</span>
+                <h3>Notifications</h3>
+                <p>Manage notifications.</p>
+            </button>
 
         </div>
 
     </section>
 
 
-    <!-- ================= OWNER DASHBOARD ================= -->
+    <!-- OWNER SUB PAGE -->
+    <section id="ownerPageSection" class="hidden">
 
-    <section
-        id="ownerSection"
-        class="hidden"
-    >
-
-        <button
-            class="back-btn"
-            onclick="ownerLogout()"
-        >
-            ← Logout
+        <button class="back-btn" onclick="showOwner()">
+            ← Owner Dashboard
         </button>
 
-
-        <h2>
-            Owner Dashboard
-        </h2>
-
-
-        <div class="owner-grid">
-
-
-            <!-- PRODUCTS -->
-
-            <button
-                class="dashboard-card"
-                onclick="ownerProducts()"
-            >
-
-                <h3>
-                    📦 Products
-                </h3>
-
-                <p>
-                    Add, edit and manage clothing.
-                </p>
-
-            </button>
-
-
-            <!-- ADD PRODUCT -->
-
-            <button
-                class="dashboard-card"
-                onclick="addProduct()"
-            >
-
-                <h3>
-                    ➕ Add Product
-                </h3>
-
-                <p>
-                    Add new clothes and stock.
-                </p>
-
-            </button>
-
-
-            <!-- ORDERS -->
-
-            <button
-                class="dashboard-card"
-                onclick="customerOrders()"
-            >
-
-                <h3>
-                    🛒 Customer Orders
-                </h3>
-
-                <p>
-                    Manage customer orders.
-                </p>
-
-            </button>
-
-
-            <!-- SHIPPING -->
-
-            <button
-                class="dashboard-card"
-                onclick="shipping()"
-            >
-
-                <h3>
-                    🚚 Shipping
-                </h3>
-
-                <p>
-                    Manage shipping status.
-                </p>
-
-            </button>
-
-
-            <!-- COMPLAINTS -->
-
-            <button
-                class="dashboard-card"
-                onclick="complaintsOwner()"
-            >
-
-                <h3>
-                    📝 Complaints
-                </h3>
-
-                <p>
-                    View customer complaints.
-                </p>
-
-            </button>
-
-
-            <!-- CUSTOMERS -->
-
-            <button
-                class="dashboard-card"
-                onclick="customers()"
-            >
-
-                <h3>
-                    👥 Customers
-                </h3>
-
-                <p>
-                    View customer information.
-                </p>
-
-            </button>
-
-
-            <!-- OFFERS -->
-
-            <button
-                class="dashboard-card"
-                onclick="offers()"
-            >
-
-                <h3>
-                    🏷️ Offers
-                </h3>
-
-                <p>
-                    Manage store offers.
-                </p>
-
-            </button>
-
-
-            <!-- NEW ARRIVALS -->
-
-            <button
-                class="dashboard-card"
-                onclick="newArrivals()"
-            >
-
-                <h3>
-                    🆕 New Arrivals
-                </h3>
-
-                <p>
-                    Manage new clothing.
-                </p>
-
-            </button>
-
-
-            <!-- ND'S COINS -->
-
-            <button
-                class="dashboard-card"
-                onclick="ndsCoins()"
-            >
-
-                <h3>
-                    🪙 ND's Coins
-                </h3>
-
-                <p>
-                    ₹200 eligible purchase = 8 coins.
-                </p>
-
-            </button>
-
-
-            <!-- STORE SETTINGS -->
-
-            <button
-                class="dashboard-card"
-                onclick="storeSettings()"
-            >
-
-                <h3>
-                    ⚙️ Store Settings
-                </h3>
-
-                <p>
-                    Manage shop details and location.
-                </p>
-
-            </button>
-
-
-            <!-- SALES -->
-
-            <button
-                class="dashboard-card"
-                onclick="sales()"
-            >
-
-                <h3>
-                    📊 Sales
-                </h3>
-
-                <p>
-                    View sales information.
-                </p>
-
-            </button>
-
-
-            <!-- NOTIFICATIONS -->
-
-            <button
-                class="dashboard-card"
-                onclick="notifications()"
-            >
-
-                <h3>
-                    🔔 Notifications
-                </h3>
-
-                <p>
-                    Manage notifications.
-                </p>
-
-            </button>
-
-
-        </div>
-
-
-        <!-- OWNER CONTENT -->
-
-        <div id="ownerContent"></div>
+        <div id="ownerPageContent"></div>
 
     </section>
 
 </main>
 
 
-<!-- ================= FOOTER ================= -->
-
 <footer>
-
     © 2026 Kit Kit Fashion
-
 </footer>
 
-
-<!-- ================= JAVASCRIPT ================= -->
 
 <script src="script.js"></script>
 
 </body>
-
-            </html>
+</html>
