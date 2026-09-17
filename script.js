@@ -2,7 +2,7 @@
 // KIT KIT FASHION
 // ============================================
 
-const API_URL = " https://github.com/devendragarg773-cmd/Kit-Kit-fashion-backent_";
+const API_URL = " https://kit-kit-fashion-0kci.onrender.com";
 
 
 // ============================================
