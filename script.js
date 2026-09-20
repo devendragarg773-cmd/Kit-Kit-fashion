@@ -1,942 +1,1246 @@
-// ============================================
-// KIT KIT FASHION
-// ============================================
+// ===============================
+// KIT KIT FASHION - SCRIPT.JS
+// ===============================
 
-const API_URL = " https://kit-kit-fashion-0kci.onrender.com";
+// बाद में यहाँ अपना Render Backend URL डालेंगे
+const API_URL = "";
+
+let products = [];
+let selectedProduct = null;
+let editingProductId = null;
 
 
-// ============================================
-// PRODUCTS
-// ============================================
+// ===============================
+// BASIC HELPERS
+// ===============================
 
-let products = [
-    {
-        id: "1",
-        name: "Classic Oversized T-Shirt",
-        price: 799,
-        mrp: 1199,
-        rating: 4.5,
-        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80",
-        description: "Comfortable premium oversized T-shirt."
-    },
+function $(id) {
+  return document.getElementById(id);
+}
 
-    {
-        id: "2",
-        name: "Premium Casual Shirt",
-        price: 1299,
-        mrp: 1799,
-        rating: 4.6,
-        image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=700&q=80",
-        description: "Premium casual shirt for everyday style."
-    },
+function show(id) {
+  $(id)?.classList.remove("hidden");
+}
 
-    {
-        id: "3",
-        name: "Everyday Hoodie",
-        price: 1499,
-        mrp: 2199,
-        rating: 4.7,
-        image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=700&q=80",
-        description: "Soft and comfortable everyday hoodie."
-    },
+function hide(id) {
+  $(id)?.classList.add("hidden");
+}
 
-    {
-        id: "4",
-        name: "Relaxed Fit Jeans",
-        price: 1599,
-        mrp: 2299,
-        rating: 4.4,
-        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=700&q=80",
-        description: "Relaxed fit jeans with comfortable styling."
+function closeAll() {
+  document.querySelectorAll(".modal").forEach(modal => {
+    modal.classList.add("hidden");
+  });
+}
+
+async function api(path, options = {}) {
+
+  if (!API_URL) {
+    throw new Error(
+      "Backend अभी connect नहीं है। पहले Backend setup करना होगा।"
+    );
+  }
+
+  const response = await fetch(API_URL + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
     }
-];
+  });
 
+  const data = await response.json().catch(() => ({}));
 
-// ============================================
-// CART
-// ============================================
+  if (!response.ok) {
+    throw new Error(data.message || "Server error");
+  }
 
-let cart = JSON.parse(
-    localStorage.getItem("kitkit_cart") || "[]"
-);
-
-function saveCart() {
-    localStorage.setItem(
-        "kitkit_cart",
-        JSON.stringify(cart)
-    );
-
-    updateCartCount();
-}
-
-function updateCartCount() {
-
-    const count = cart.reduce(
-        (total, item) => total + item.quantity,
-        0
-    );
-
-    document.getElementById("cartCount").textContent = count;
+  return data;
 }
 
 
-// ============================================
-// NAVIGATION
-// ============================================
+// ===============================
+// PAGE CONTROL
+// ===============================
 
-function hideSections() {
+function hidePages() {
 
-    document
-        .querySelectorAll("main section")
-        .forEach(section => {
-            section.classList.add("hidden");
-        });
+  [
+    "homePage",
+    "productPage",
+    "cartPage",
+    "settingsPage",
+    "ownerPage"
+  ].forEach(id => hide(id));
 }
+
 
 function showHome() {
 
-    hideSections();
+  closeAll();
+  hidePages();
+  show("homePage");
 
-    document
-        .getElementById("homeSection")
-        .classList.remove("hidden");
-
-    window.scrollTo(0, 0);
-
-    loadProducts();
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
+
 
 function showCart() {
 
-    hideSections();
+  closeAll();
+  hidePages();
+  show("cartPage");
 
-    document
-        .getElementById("cartSection")
-        .classList.remove("hidden");
-
-    renderCart();
-
-    window.scrollTo(0, 0);
+  renderCart();
 }
+
 
 function showSettings() {
 
-    hideSections();
-
-    document
-        .getElementById("settingsSection")
-        .classList.remove("hidden");
-
-    window.scrollTo(0, 0);
-}
-
-function showOwner() {
-
-    hideSections();
-
-    document
-        .getElementById("ownerSection")
-        .classList.remove("hidden");
-
-    window.scrollTo(0, 0);
+  closeAll();
+  hidePages();
+  show("settingsPage");
 }
 
 
-// ============================================
-// PRODUCTS
-// ============================================
+function scrollToProducts() {
+
+  showHome();
+
+  setTimeout(() => {
+    $("productsSection")?.scrollIntoView({
+      behavior: "smooth"
+    });
+  }, 100);
+}
+
+
+// ===============================
+// LOAD PRODUCTS
+// ===============================
 
 async function loadProducts() {
 
-    if (!API_URL) {
-        renderProducts();
-        return;
-    }
+  $("loading").classList.remove("hidden");
+  $("noProducts").classList.add("hidden");
 
-    try {
+  try {
 
-        const response = await fetch(
-            `${API_URL}/api/products`
-        );
+    const data = await api("/api/products");
 
-        if (!response.ok) {
-            throw new Error("Products load failed");
-        }
-
-        const backendProducts = await response.json();
-
-        if (
-            Array.isArray(backendProducts) &&
-            backendProducts.length
-        ) {
-            products = backendProducts;
-        }
-
-    } catch (error) {
-        console.error(error);
-    }
+    products = Array.isArray(data)
+      ? data
+      : (data.products || []);
 
     renderProducts();
+
+  } catch (error) {
+
+    console.error(error);
+
+    products = [];
+
+    $("products").innerHTML = `
+      <div class="empty">
+        <h3>Products load नहीं हो पाए</h3>
+        <p>Backend connect होने के बाद products यहाँ दिखाई देंगे.</p>
+      </div>
+    `;
+
+  } finally {
+
+    $("loading").classList.add("hidden");
+  }
 }
 
 
-function renderProducts() {
+// ===============================
+// PRODUCT CARDS
+// ===============================
 
-    const box = document.getElementById("products");
+function renderProducts(list = products) {
 
-    box.innerHTML = products.map(product => `
+  const container = $("products");
 
-        <article class="product-card">
+  if (!container) return;
 
-            <img
-                src="${product.image || ""}"
-                alt="${product.name}"
-            >
+  if (!list.length) {
 
-            <h3>${product.name}</h3>
+    container.innerHTML = "";
 
-            <p class="muted">
-                ★ ${product.rating || 0}
-            </p>
+    $("noProducts").classList.remove("hidden");
 
-            <p>
-                ${product.description || ""}
-            </p>
+    return;
+  }
 
-            <p class="price">
-                ₹${product.price}
-            </p>
+  $("noProducts").classList.add("hidden");
 
-            <button
-                class="primary-btn"
-                onclick="openProduct('${product.id}')"
-            >
-                View Product
+  container.innerHTML = list.map(product => {
+
+    const image =
+      product.image ||
+      product.image_url ||
+      "https://via.placeholder.com/500x500?text=Product";
+
+    return `
+      <div class="product-card">
+
+        <img
+          class="product-image"
+          src="${escapeHTML(image)}"
+          alt="${escapeHTML(product.name || "Product")}"
+          onerror="this.src='https://via.placeholder.com/500x500?text=Product'"
+        >
+
+        <div class="product-info">
+
+          <h3>
+            ${escapeHTML(product.name || "Product")}
+          </h3>
+
+          <div>
+
+            <span class="price">
+              ₹${Number(product.price || 0)}
+            </span>
+
+            ${
+              product.mrp
+                ? `<span class="mrp">₹${Number(product.mrp)}</span>`
+                : ""
+            }
+
+          </div>
+
+          <div class="product-buttons">
+
+            <button onclick="openProduct(${Number(product.id)})">
+              View Product
             </button>
 
-            <button
-                class="back-btn"
-                onclick="addToCart('${product.id}')"
-            >
-                Add To Cart
+            <button onclick="addToCart(${Number(product.id)})">
+              Add To Cart
             </button>
 
-        </article>
+            <button onclick="buyNow(${Number(product.id)})">
+              Buy Now
+            </button>
 
-    `).join("");
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
 }
 
 
-// ============================================
-// PRODUCT PAGE
-// ============================================
+// ===============================
+// PRODUCT DETAIL
+// ===============================
 
 function openProduct(id) {
 
-    const product = products.find(
-        item => item.id === id
-    );
+  const product = products.find(
+    p => Number(p.id) === Number(id)
+  );
 
-    if (!product) return;
+  if (!product) {
+    alert("Product नहीं मिला");
+    return;
+  }
 
-    hideSections();
+  selectedProduct = product;
 
-    document
-        .getElementById("productSection")
-        .classList.remove("hidden");
+  hidePages();
+  show("productPage");
 
-    document
-        .getElementById("productDetail")
-        .innerHTML = `
+  const image =
+    product.image ||
+    product.image_url ||
+    "https://via.placeholder.com/600x600?text=Product";
 
-        <div class="product-card">
+  $("productDetails").innerHTML = `
 
-            <img
-                src="${product.image || ""}"
-                alt="${product.name}"
-            >
+    <div class="detail-card">
 
-            <h1>${product.name}</h1>
+      <img
+        src="${escapeHTML(image)}"
+        alt="${escapeHTML(product.name || "Product")}"
+      >
 
-            <p>★ ${product.rating || 0}</p>
+      <div class="detail-info">
 
-            <p class="price">
-                ₹${product.price}
+        <h1>
+          ${escapeHTML(product.name || "Product")}
+        </h1>
 
-                <del class="muted">
-                    ₹${product.mrp}
-                </del>
-            </p>
+        <p>
+          ${escapeHTML(product.description || "No description available.")}
+        </p>
 
-            <p>${product.description || ""}</p>
+        <p>
+          Category:
+          ${escapeHTML(product.category || "Fashion")}
+        </p>
 
-            <p>
-                Size: S / M / L / XL
-            </p>
+        <div class="detail-price">
+          ₹${Number(product.price || 0)}
 
-            <p>
-                Delivery available
-            </p>
+          ${
+            product.mrp
+              ? `<span class="mrp">₹${Number(product.mrp)}</span>`
+              : ""
+          }
+        </div>
 
-            <button
-                class="primary-btn"
-                onclick="addToCart('${product.id}')"
-            >
-                Add To Cart
+        <button
+          class="primary-btn"
+          onclick="addToCart(${Number(product.id)})"
+        >
+          🛒 Add To Cart
+        </button>
+
+        <button
+          class="primary-btn"
+          onclick="buyNow(${Number(product.id)})"
+        >
+          Buy Now
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+
+  const related = products
+    .filter(p => Number(p.id) !== Number(id))
+    .slice(0, 4);
+
+  $("relatedProducts").innerHTML = related.map(p => {
+
+    const img =
+      p.image ||
+      p.image_url ||
+      "https://via.placeholder.com/500x500?text=Product";
+
+    return `
+      <div class="product-card">
+
+        <img
+          class="product-image"
+          src="${escapeHTML(img)}"
+        >
+
+        <div class="product-info">
+
+          <h3>${escapeHTML(p.name || "Product")}</h3>
+
+          <div class="price">
+            ₹${Number(p.price || 0)}
+          </div>
+
+          <div class="product-buttons">
+
+            <button onclick="openProduct(${Number(p.id)})">
+              View Product
             </button>
 
-            <button
-                class="primary-btn"
-                onclick="buyNow('${product.id}')"
-            >
-                Buy Now
-            </button>
+          </div>
 
         </div>
+
+      </div>
     `;
 
-    const related = products
-        .filter(item => item.id !== product.id)
-        .slice(0, 4);
-
-    document
-        .getElementById("relatedProducts")
-        .innerHTML = related.map(item => `
-
-            <article
-                class="product-card"
-                onclick="openProduct('${item.id}')"
-            >
-
-                <img
-                    src="${item.image || ""}"
-                    alt="${item.name}"
-                >
-
-                <h3>${item.name}</h3>
-
-                <p class="price">
-                    ₹${item.price}
-                </p>
-
-            </article>
-
-        `).join("");
-
-    window.scrollTo(0, 0);
+  }).join("");
 }
 
 
-function buyNow(id) {
-    addToCart(id);
-    showCart();
-}
-
-
-// ============================================
+// ===============================
 // CART
-// ============================================
+// ===============================
+
+function getCart() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem("kitkit_cart") || "[]"
+    );
+
+  } catch {
+
+    return [];
+  }
+}
+
+
+function saveCart(cart) {
+
+  localStorage.setItem(
+    "kitkit_cart",
+    JSON.stringify(cart)
+  );
+}
+
 
 function addToCart(id) {
 
-    const product = products.find(
-        item => item.id === id
-    );
+  const product = products.find(
+    p => Number(p.id) === Number(id)
+  );
 
-    if (!product) return;
+  if (!product) {
+    alert("Product नहीं मिला");
+    return;
+  }
 
-    const existing = cart.find(
-        item => item.productId === id
-    );
+  const cart = getCart();
 
-    if (existing) {
-        existing.quantity++;
-    } else {
-        cart.push({
-            productId: id,
-            quantity: 1
-        });
-    }
+  const existing = cart.find(
+    item => Number(item.id) === Number(id)
+  );
 
-    saveCart();
+  if (existing) {
 
-    alert("Product cart me add ho gaya.");
+    existing.quantity =
+      Number(existing.quantity || 1) + 1;
+
+  } else {
+
+    cart.push({
+      ...product,
+      quantity: 1
+    });
+  }
+
+  saveCart(cart);
+
+  alert("Product cart में add हो गया ✅");
 }
 
 
 function removeFromCart(id) {
 
-    cart = cart.filter(
-        item => item.productId !== id
+  let cart = getCart();
+
+  cart = cart.filter(
+    item => Number(item.id) !== Number(id)
+  );
+
+  saveCart(cart);
+
+  renderCart();
+}
+
+
+function changeQuantity(id, change) {
+
+  const cart = getCart();
+
+  const item = cart.find(
+    p => Number(p.id) === Number(id)
+  );
+
+  if (!item) return;
+
+  item.quantity =
+    Number(item.quantity || 1) + change;
+
+  if (item.quantity <= 0) {
+
+    const newCart = cart.filter(
+      p => Number(p.id) !== Number(id)
     );
 
-    saveCart();
+    saveCart(newCart);
 
-    renderCart();
+  } else {
+
+    saveCart(cart);
+  }
+
+  renderCart();
 }
 
 
 function renderCart() {
 
-    const box = document.getElementById("cartItems");
+  const cart = getCart();
 
-    if (!cart.length) {
+  const container = $("cartItems");
 
-        box.innerHTML =
-            "<p class='muted'>Your cart is empty.</p>";
+  if (!container) return;
 
-        document.getElementById(
-            "cartTotal"
-        ).textContent = "";
+  if (!cart.length) {
 
-        return;
-    }
+    container.innerHTML = "";
 
-    let total = 0;
+    show("cartEmpty");
+    hide("cartSummary");
 
-    box.innerHTML = cart.map(item => {
+    return;
+  }
 
-        const product = products.find(
-            p => p.id === item.productId
-        );
+  hide("cartEmpty");
+  show("cartSummary");
 
-        if (!product) return "";
+  let total = 0;
 
-        total +=
-            product.price * item.quantity;
+  container.innerHTML = cart.map(item => {
 
-        return `
+    const quantity =
+      Number(item.quantity || 1);
 
-            <div class="cart-item">
+    total +=
+      Number(item.price || 0) * quantity;
 
-                <h3>${product.name}</h3>
+    const image =
+      item.image ||
+      item.image_url ||
+      "https://via.placeholder.com/100x100?text=Product";
 
-                <p>
-                    ₹${product.price}
-                    ×
-                    ${item.quantity}
-                </p>
+    return `
 
-                <button
-                    class="back-btn"
-                    onclick="removeFromCart('${product.id}')"
-                >
-                    Remove
-                </button>
+      <div class="cart-item">
 
-            </div>
-        `;
+        <img src="${escapeHTML(image)}">
 
-    }).join("");
+        <div>
 
-    document.getElementById(
-        "cartTotal"
-    ).textContent =
-        "Total: ₹" + total;
-}
+          <h3>
+            ${escapeHTML(item.name || "Product")}
+          </h3>
 
+          <p>
+            ₹${Number(item.price || 0)}
+          </p>
 
-function checkout() {
+          <div>
 
-    if (!cart.length) {
-        alert("Cart empty hai.");
-        return;
-    }
-
-    alert(
-        "Checkout page ready hai. Payment/order system baad me connect kiya ja sakta hai."
-    );
-}
-
-
-// ============================================
-// OWNER ACCESS
-// ============================================
-
-function ownerAccess() {
-
-    const password = prompt(
-        "🔐 Owner Password enter karo:"
-    );
-
-    if (password === null) return;
-
-    // Demo password
-    if (password === "123456") {
-
-        showOwner();
-
-    } else {
-
-        alert("❌ Wrong Owner Password.");
-    }
-}
-
-
-// ============================================
-// OWNER DASHBOARD PAGES
-// ============================================
-
-const ownerPages = {
-
-    products: {
-        title: "👕 Products",
-        content: `
-            <p>Yahan aap store ke products manage kar sakte ho.</p>
-
-            <button class="primary-btn"
-                onclick="alert('Product list refresh ho gayi.')">
-                Refresh Products
+            <button onclick="changeQuantity(${Number(item.id)}, -1)">
+              −
             </button>
 
-            <button class="primary-btn"
-                onclick="openOwnerPage('addProduct')">
-                Add New Product
+            <strong>
+              ${quantity}
+            </strong>
+
+            <button onclick="changeQuantity(${Number(item.id)}, 1)">
+              +
             </button>
-        `
-    },
 
-    addProduct: {
-        title: "➕ Add Product",
-        content: `
-            <form class="owner-form"
-                onsubmit="addDemoProduct(event)">
+          </div>
 
-                <input
-                    id="newName"
-                    placeholder="Product Name"
-                    required
-                >
-
-                <input
-                    id="newPrice"
-                    type="number"
-                    placeholder="Price"
-                    required
-                >
-
-                <input
-                    id="newMrp"
-                    type="number"
-                    placeholder="MRP"
-                    required
-                >
-
-                <input
-                    id="newImage"
-                    placeholder="Image URL"
-                    required
-                >
-
-                <textarea
-                    id="newDescription"
-                    placeholder="Product Description"
-                    required
-                ></textarea>
-
-                <button class="primary-btn">
-                    Add Product
-                </button>
-
-            </form>
-        `
-    },
-
-    orders: {
-        title: "📦 Customer Orders",
-        content: `
-            <p>No new orders available.</p>
-
-            <button class="primary-btn"
-                onclick="alert('Orders refreshed.')">
-                Refresh Orders
-            </button>
-        `
-    },
-
-    shipping: {
-        title: "🚚 Shipping",
-        content: `
-            <p>Manage shipping status here.</p>
-
-            <select class="owner-form">
-                <option>Processing</option>
-                <option>Packed</option>
-                <option>Shipped</option>
-                <option>Delivered</option>
-            </select>
-
-            <button class="primary-btn"
-                onclick="alert('Shipping status saved.')">
-                Save Status
-            </button>
-        `
-    },
-
-    complaints: {
-        title: "📝 Complaints",
-        content: `
-            <p>No complaints available.</p>
-
-            <button class="primary-btn"
-                onclick="alert('Complaints refreshed.')">
-                Refresh
-            </button>
-        `
-    },
-
-    customers: {
-        title: "👥 Customers",
-        content: `
-            <p>Customer management page.</p>
-
-            <button class="primary-btn"
-                onclick="alert('Customer list refreshed.')">
-                View Customers
-            </button>
-        `
-    },
-
-    offers: {
-        title: "🏷️ Offers",
-        content: `
-            <form class="owner-form"
-                onsubmit="saveOffer(event)">
-
-                <input
-                    id="offerName"
-                    placeholder="Offer Name"
-                    required
-                >
-
-                <input
-                    id="offerDiscount"
-                    type="number"
-                    placeholder="Discount %"
-                    required
-                >
-
-                <button class="primary-btn">
-                    Save Offer
-                </button>
-
-            </form>
-        `
-    },
-
-    arrivals: {
-        title: "✨ New Arrivals",
-        content: `
-            <p>New arrivals management page.</p>
-
-            <button class="primary-btn"
-                onclick="alert('New arrivals updated.')">
-                Update Arrivals
-            </button>
-        `
-    },
-
-    coins: {
-        title: "🪙 ND's Coins",
-        content: `
-            <h3>Current Reward Rule</h3>
-
-            <p>
-                Every ₹200 eligible purchase = 8 ND's Coins.
-            </p>
-
-            <button class="primary-btn"
-                onclick="alert('Coin settings saved.')">
-                Save Coin Settings
-            </button>
-        `
-    },
-
-    storeSettings: {
-        title: "⚙️ Store Settings",
-        content: `
-            <form class="owner-form"
-                onsubmit="saveStore(event)">
-
-                <input
-                    id="storeName"
-                    value="Kit Kit Fashion"
-                    placeholder="Store Name"
-                    required
-                >
-
-                <input
-                    id="storePhone"
-                    placeholder="Store Phone"
-                    required
-                >
-
-                <input
-                    id="storeLocation"
-                    placeholder="Store Location"
-                    required
-                >
-
-                <button class="primary-btn">
-                    Save Store Settings
-                </button>
-
-            </form>
-        `
-    },
-
-    sales: {
-        title: "📊 Sales",
-        content: `
-            <h3>Sales Overview</h3>
-
-            <p>
-                Total Products: ${products.length}
-            </p>
-
-            <p>
-                Cart Items: ${cart.length}
-            </p>
-
-            <button class="primary-btn"
-                onclick="alert('Sales report generated.')">
-                Generate Report
-            </button>
-        `
-    },
-
-    notifications: {
-        title: "🔔 Notifications",
-        content: `
-            <form class="owner-form"
-                onsubmit="sendNotification(event)">
-
-                <input
-                    id="notificationTitle"
-                    placeholder="Notification Title"
-                    required
-                >
-
-                <textarea
-                    id="notificationMessage"
-                    placeholder="Notification Message"
-                    required
-                ></textarea>
-
-                <button class="primary-btn">
-                    Send Notification
-                </button>
-
-            </form>
-        `
-    }
-
-};
-
-
-// ============================================
-// OPEN OWNER PAGE
-// ============================================
-
-function openOwnerPage(page) {
-
-    const data = ownerPages[page];
-
-    if (!data) return;
-
-    hideSections();
-
-    document
-        .getElementById("ownerPageSection")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("ownerPageContent")
-        .innerHTML = `
-
-        <div class="owner-page-box">
-
-            <h1>${data.title}</h1>
-
-            ${data.content}
+          <button onclick="removeFromCart(${Number(item.id)})">
+            Remove
+          </button>
 
         </div>
+
+      </div>
+
     `;
 
-    window.scrollTo(0, 0);
+  }).join("");
+
+  $("cartTotal").textContent =
+    total.toFixed(0);
 }
 
 
-// ============================================
-// OWNER PAGE ACTIONS
-// ============================================
+// ===============================
+// BUY NOW
+// ===============================
 
-function addDemoProduct(event) {
+function buyNow(id) {
+
+  const product = products.find(
+    p => Number(p.id) === Number(id)
+  );
+
+  if (!product) {
+    alert("Product नहीं मिला");
+    return;
+  }
+
+  const cart = [{
+    ...product,
+    quantity: 1
+  }];
+
+  saveCart(cart);
+
+  customerLogin();
+}
+
+
+// ===============================
+// CUSTOMER LOGIN
+// ===============================
+
+function customerLogin() {
+
+  show("loginModal");
+}
+
+
+async function loginCustomer() {
+
+  const name =
+    $("customerName").value.trim();
+
+  const mobile =
+    $("customerMobile").value.trim();
+
+  if (!name || mobile.length !== 10) {
+
+    alert("सही नाम और 10 digit mobile number डालें");
+
+    return;
+  }
+
+  try {
+
+    const data = await api(
+      "/api/customer/login",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          name,
+          mobile
+        })
+      }
+    );
+
+    localStorage.setItem(
+      "customer",
+      JSON.stringify(data.customer || {
+        name,
+        mobile
+      })
+    );
+
+    closeAll();
+
+    alert("Login successful ✅");
+
+    checkout();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
+
+
+// ===============================
+// CHECKOUT
+// ===============================
+
+async function checkout() {
+
+  const customer =
+    JSON.parse(
+      localStorage.getItem("customer") || "null"
+    );
+
+  if (!customer) {
+
+    show("loginModal");
+
+    return;
+  }
+
+  const cart = getCart();
+
+  if (!cart.length) {
+
+    alert("Cart खाली है");
+
+    return;
+  }
+
+  const items = cart.map(item => ({
+    product_id: item.id,
+    quantity: item.quantity,
+    price: item.price
+  }));
+
+  try {
+
+    await api(
+      "/api/orders",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          customer,
+          items
+        })
+      }
+    );
+
+    localStorage.removeItem("kitkit_cart");
+
+    alert(
+      "Order successfully placed ✅"
+    );
+
+    showHome();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
+
+
+// ===============================
+// OWNER LOGIN
+// ===============================
+
+function openOwnerLogin() {
+
+  show("ownerLoginModal");
+}
+
+
+async function sendOwnerOTP() {
+
+  const mobile =
+    $("ownerMobile").value.trim();
+
+  if (mobile.length !== 10) {
+
+    alert("10 digit owner mobile number डालें");
+
+    return;
+  }
+
+  try {
+
+    const data = await api(
+      "/api/owner/send-otp",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          mobile
+        })
+      }
+    );
+
+    show("otpArea");
+
+    alert(
+      data.message || "OTP भेज दिया गया"
+    );
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
+
+
+async function verifyOwnerOTP() {
+
+  const mobile =
+    $("ownerMobile").value.trim();
+
+  const otp =
+    $("ownerOTP").value.trim();
+
+  if (!otp) {
+
+    alert("OTP डालें");
+
+    return;
+  }
+
+  try {
+
+    const data = await api(
+      "/api/owner/verify-otp",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+          mobile,
+          otp
+        })
+      }
+    );
+
+    localStorage.setItem(
+      "ownerToken",
+      data.token || "owner_logged_in"
+    );
+
+    closeAll();
+
+    openOwnerDashboard();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
+
+
+// ===============================
+// OWNER DASHBOARD
+// ===============================
+
+function openOwnerDashboard() {
+
+  hidePages();
+  show("ownerPage");
+
+  loadOwnerProducts();
+}
+
+
+function ownerLogout() {
+
+  localStorage.removeItem("ownerToken");
+
+  showHome();
+}
+
+
+async function loadOwnerProducts() {
+
+  await loadProducts();
+}
+
+
+// ===============================
+// ADD PRODUCT
+// ===============================
+
+function openAddProduct() {
+
+  editingProductId = null;
+
+  $("productForm").reset();
+
+  $("imagePreview").innerHTML =
+    "<span>Product photo preview</span>";
+
+  show("addProductModal");
+}
+
+
+$("productImage")?.addEventListener(
+  "change",
+  function () {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    const reader =
+      new FileReader();
+
+    reader.onload = function(e) {
+
+      $("imagePreview").innerHTML = `
+        <img src="${e.target.result}">
+      `;
+    };
+
+    reader.readAsDataURL(file);
+  }
+);
+
+
+// ===============================
+// SAVE PRODUCT
+// ===============================
+
+$("productForm")?.addEventListener(
+  "submit",
+  async function(event) {
 
     event.preventDefault();
 
     const name =
-        document.getElementById("newName").value;
+      $("productName").value.trim();
 
     const price =
-        Number(document.getElementById("newPrice").value);
+      Number($("productPrice").value);
 
     const mrp =
-        Number(document.getElementById("newMrp").value);
+      Number($("productMRP").value || 0);
 
-    const image =
-        document.getElementById("newImage").value;
+    const category =
+      $("productCategory").value;
 
     const description =
-        document.getElementById("newDescription").value;
+      $("productDescription").value.trim();
 
-    products.push({
-        id: Date.now().toString(),
+    const imageFile =
+      $("productImage").files[0];
+
+    if (!name || !price) {
+
+      alert("Product name और price डालें");
+
+      return;
+    }
+
+    try {
+
+      let imageUrl = "";
+
+      // पहले image online upload होगी
+      if (imageFile) {
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "image",
+          imageFile
+        );
+
+        const uploadResponse =
+          await fetch(
+            API_URL + "/api/upload-image",
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+        const uploadData =
+          await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+
+          throw new Error(
+            uploadData.message ||
+            "Image upload failed"
+          );
+        }
+
+        imageUrl =
+          uploadData.url ||
+          uploadData.imageUrl;
+      }
+
+
+      const productData = {
         name,
         price,
         mrp,
-        rating: 5,
-        image,
-        description
-    });
+        category,
+        description,
+        image: imageUrl
+      };
 
-    alert("✅ Product successfully added.");
 
-    openOwnerPage("products");
+      if (editingProductId) {
+
+        await api(
+          "/api/products/" +
+          editingProductId,
+          {
+            method: "PUT",
+            body: JSON.stringify(productData)
+          }
+        );
+
+        alert(
+          "Product updated successfully ✅"
+        );
+
+      } else {
+
+        await api(
+          "/api/products",
+          {
+            method: "POST",
+            body: JSON.stringify(productData)
+          }
+        );
+
+        alert(
+          "Product online database में save हो गया ✅"
+        );
+      }
+
+
+      closeAll();
+
+      await loadProducts();
+
+      openOwnerDashboard();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(error.message);
+    }
+
+  }
+);
+
+
+// ===============================
+// MANAGE PRODUCTS
+// ===============================
+
+async function manageProducts() {
+
+  try {
+
+    const data =
+      await api("/api/products");
+
+    products =
+      Array.isArray(data)
+        ? data
+        : (data.products || []);
+
+    $("ownerContent").innerHTML = `
+
+      <div class="settings-card">
+
+        <h2>Manage Products</h2>
+
+        ${
+          products.length
+            ? products.map(product => `
+
+              <div class="cart-item">
+
+                <img
+                  src="${escapeHTML(
+                    product.image ||
+                    "https://via.placeholder.com/100"
+                  )}"
+                >
+
+                <div>
+
+                  <h3>
+                    ${escapeHTML(product.name)}
+                  </h3>
+
+                  <p>
+                    ₹${Number(product.price || 0)}
+                  </p>
+
+                  <button
+                    onclick="editProduct(${Number(product.id)})"
+                  >
+                    ✏️ Edit
+                  </button>
+
+                  <button
+                    onclick="deleteProduct(${Number(product.id)})"
+                  >
+                    🗑️ Delete
+                  </button>
+
+                </div>
+
+              </div>
+
+            `).join("")
+            : "<p>No products found.</p>"
+        }
+
+      </div>
+
+    `;
+
+  } catch (error) {
+
+    alert(error.message);
+  }
 }
 
 
-function saveOffer(event) {
+// ===============================
+// EDIT PRODUCT
+// ===============================
 
-    event.preventDefault();
+function editProduct(id) {
 
-    const name =
-        document.getElementById("offerName").value;
-
-    const discount =
-        document.getElementById("offerDiscount").value;
-
-    localStorage.setItem(
-        "kitkit_offer",
-        JSON.stringify({
-            name,
-            discount
-        })
+  const product =
+    products.find(
+      p => Number(p.id) === Number(id)
     );
 
-    alert("✅ Offer saved successfully.");
+  if (!product) return;
+
+  editingProductId = id;
+
+  $("productName").value =
+    product.name || "";
+
+  $("productPrice").value =
+    product.price || "";
+
+  $("productMRP").value =
+    product.mrp || "";
+
+  $("productCategory").value =
+    product.category || "Other";
+
+  $("productDescription").value =
+    product.description || "";
+
+  $("imagePreview").innerHTML = product.image
+    ? `<img src="${escapeHTML(product.image)}">`
+    : "<span>Current image</span>";
+
+  show("addProductModal");
 }
 
 
-function saveStore(event) {
+// ===============================
+// DELETE PRODUCT
+// ===============================
 
-    event.preventDefault();
+async function deleteProduct(id) {
 
-    localStorage.setItem(
-        "kitkit_store",
-        JSON.stringify({
-            name: document.getElementById("storeName").value,
-            phone: document.getElementById("storePhone").value,
-            location: document.getElementById("storeLocation").value
-        })
+  if (!confirm(
+    "क्या आप यह product delete करना चाहते हैं?"
+  )) {
+    return;
+  }
+
+  try {
+
+    await api(
+      "/api/products/" + id,
+      {
+        method: "DELETE"
+      }
     );
 
-    alert("✅ Store settings saved.");
+    alert("Product deleted ✅");
+
+    await loadProducts();
+
+    manageProducts();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
 }
 
 
-function sendNotification(event) {
+// ===============================
+// ORDERS
+// ===============================
 
-    event.preventDefault();
+async function showOrders() {
 
-    alert("🔔 Notification created successfully.");
+  try {
+
+    const data =
+      await api("/api/orders");
+
+    const orders =
+      Array.isArray(data)
+        ? data
+        : (data.orders || []);
+
+    $("ownerContent").innerHTML = `
+
+      <div class="settings-card">
+
+        <h2>📦 Orders</h2>
+
+        ${
+          orders.length
+            ? orders.map(order => `
+
+              <div class="cart-item">
+
+                <div>
+
+                  <h3>
+                    Order #${order.id}
+                  </h3>
+
+                  <p>
+                    Status:
+                    ${escapeHTML(order.status || "Pending")}
+                  </p>
+
+                  <p>
+                    Total:
+                    ₹${Number(order.total || 0)}
+                  </p>
+
+                </div>
+
+              </div>
+
+            `).join("")
+            : "<p>No orders yet.</p>"
+        }
+
+      </div>
+
+    `;
+
+  } catch (error) {
+
+    alert(error.message);
+  }
 }
 
 
-// ============================================
-// SETTINGS PAGES
-// ============================================
+// ===============================
+// COMPLAINTS
+// ===============================
 
-function helpDesk() {
+async function showComplaints() {
 
-    alert(
-        "☎ Helpline\n\nCustomer support is available here."
-    );
-}
+  try {
 
+    const data =
+      await api("/api/complaints");
 
-function complaint() {
+    const complaints =
+      Array.isArray(data)
+        ? data
+        : (data.complaints || []);
 
-    const message = prompt(
-        "📝 Complaint / Feedback likho:"
-    );
+    $("ownerContent").innerHTML = `
 
-    if (!message) return;
+      <div class="settings-card">
 
-    localStorage.setItem(
-        "kitkit_complaint",
-        message
-    );
+        <h2>📝 Complaints</h2>
 
-    alert("✅ Complaint / Feedback submit ho gaya.");
-}
+        ${
+          complaints.length
+            ? complaints.map(c => `
 
+              <div class="cart-item">
 
-function myOrders() {
+                <div>
 
-    alert(
-        "📦 My Orders\n\nAbhi koi order available nahi hai."
-    );
-}
+                  <h3>
+                    ${escapeHTML(c.name || "Customer")}
+                  </h3>
 
-
-function storeLocation() {
-
-    alert(
-        "📍 Store Location\n\nStore location yahan add ki ja sakti hai."
-    );
-}
-
-
-function aboutUs() {
-
-    alert(
-        "ℹ Kit Kit Fashion\n\nYour stylish everyday clothing store."
-    );
-}
-
-
-function privacy() {
-
-    alert(
-        "🔒 Privacy Policy & Terms\n\nYour information should be handled responsibly."
-    );
-}
-
-
-// ============================================
-// SCROLL
-// ============================================
-
-function scrollToProducts() {
-
-    document
-        .getElementById("products")
-        .scrollIntoView({
-            behavior: "smooth"
-        });
-}
-
-
-// ============================================
-// START
-// ============================================
-
-updateCartCount();
-showHome();process.on("uncaughtException", (err) => {
-    console.error("UNCAUGHT ERROR:", err);
-});
-
-process.on("unhandledRejection", (err) => {
-    console.error("UNHANDLED REJECTION:", err);
-});
+                  <p>
+                    ${escapeHTML(c.message |
