@@ -1,243 +1,436 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Kit Kit Fashion</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kit Kit Fashion</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="header">
-    <a href="#" class="logo" onclick="showHome()">
-        KIT KIT <span>FASHION</span>
-    </a>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-area">
+      <span class="logo">KK</span>
+      <div>
+        <h1 id="shopName">Kit Kit Fashion</h1>
+        <p>Fashion for Everyone</p>
+      </div>
+    </div>
 
-    <nav>
-        <button onclick="showHome()">Home</button>
-        <button onclick="showCart()">
-            Cart (<span id="cartCount">0</span>)
-        </button>
-        <button onclick="showSettings()">Settings</button>
-    </nav>
-</header>
+    <div class="header-actions">
+      <button onclick="showHome()">Home</button>
+      <button onclick="showCart()">🛒 Cart</button>
+      <button onclick="showSettings()">⚙️ Settings</button>
+    </div>
+  </header>
 
 
-<main>
+  <!-- HOME -->
+  <main id="homePage">
 
-    <!-- HOME -->
-    <section id="homeSection">
-
-        <div class="hero">
-            <p class="small-title">KIT KIT FASHION</p>
-
-            <h1>Style That Feels Like You.</h1>
-
-            <p>
-                Discover stylish clothing for everyday life.
-            </p>
-
-            <button class="primary-btn" onclick="scrollToProducts()">
-                Shop Now
-            </button>
-        </div>
-
-        <h2>Clothing Collection</h2>
-
-        <div id="products" class="product-grid"></div>
-
+    <section class="hero">
+      <div>
+        <h2>Discover Your Style</h2>
+        <p>Explore the latest fashion at great prices.</p>
+        <button onclick="scrollToProducts()">Shop Now</button>
+      </div>
     </section>
 
+    <section class="products-section" id="productsSection">
+      <div class="section-heading">
+        <h2>Latest Products</h2>
+        <button onclick="loadProducts()">↻ Refresh</button>
+      </div>
 
-    <!-- PRODUCT -->
-    <section id="productSection" class="hidden">
+      <div id="loading" class="loading">
+        Loading products...
+      </div>
 
-        <button class="back-btn" onclick="showHome()">← Back</button>
+      <div id="products" class="products-grid"></div>
 
-        <div id="productDetail"></div>
-
-        <h2>You May Also Like</h2>
-
-        <div id="relatedProducts" class="product-grid"></div>
-
+      <div id="noProducts" class="empty hidden">
+        <h3>No products available</h3>
+        <p>New products will appear here.</p>
+      </div>
     </section>
 
-
-    <!-- CART -->
-    <section id="cartSection" class="hidden">
-
-        <button class="back-btn" onclick="showHome()">← Home</button>
-
-        <h2>My Cart</h2>
-
-        <div id="cartItems"></div>
-
-        <div id="cartTotal" class="cart-total"></div>
-
-        <button class="primary-btn" onclick="checkout()">
-            Proceed to Checkout
-        </button>
-
-    </section>
+  </main>
 
 
-    <!-- SETTINGS -->
-    <section id="settingsSection" class="hidden">
+  <!-- PRODUCT DETAIL -->
+  <section id="productPage" class="page hidden">
 
-        <h2>Settings</h2>
+    <div class="page-top">
+      <button onclick="showHome()">← Back</button>
+      <button onclick="showHome()">🏠 Home</button>
+    </div>
 
-        <div class="settings-grid">
+    <div id="productDetails"></div>
 
-            <button class="owner-access-btn" onclick="ownerAccess()">
-                <span>🔐</span>
-                <strong>Owner Access</strong>
-                <small>Open Owner Dashboard</small>
-            </button>
+    <h2 class="related-title">Related Products</h2>
+    <div id="relatedProducts" class="products-grid"></div>
 
-            <button onclick="helpDesk()">
-                ☎ Help / Helpline
-            </button>
-
-            <button onclick="complaint()">
-                📝 Complaint / Feedback
-            </button>
-
-            <button onclick="myOrders()">
-                📦 My Orders
-            </button>
-
-            <button onclick="storeLocation()">
-                📍 Store Location
-            </button>
-
-            <button onclick="aboutUs()">
-                ℹ About Us
-            </button>
-
-            <button onclick="privacy()">
-                🔒 Privacy / Terms
-            </button>
-
-        </div>
-
-    </section>
+  </section>
 
 
-    <!-- OWNER DASHBOARD -->
-    <section id="ownerSection" class="hidden">
+  <!-- CART -->
+  <section id="cartPage" class="page hidden">
 
-        <button class="back-btn" onclick="showSettings()">
-            ← Back
-        </button>
+    <div class="page-top">
+      <button onclick="showHome()">← Home</button>
+    </div>
 
-        <div class="owner-title">
-            <p>OWNER PANEL</p>
-            <h2>Owner Dashboard</h2>
-            <span>Manage your complete fashion store</span>
-        </div>
+    <h2>Your Cart</h2>
 
-        <div class="owner-grid">
+    <div id="cartItems"></div>
 
-            <button class="dashboard-card" onclick="openOwnerPage('products')">
-                <span class="card-icon">👕</span>
-                <h3>Products</h3>
-                <p>Add, edit and manage clothing.</p>
-            </button>
+    <div id="cartEmpty" class="empty">
+      <h3>Your cart is empty</h3>
+      <p>Add some products to your cart.</p>
+    </div>
 
-            <button class="dashboard-card" onclick="openOwnerPage('addProduct')">
-                <span class="card-icon">➕</span>
-                <h3>Add Product</h3>
-                <p>Add new clothes and stock.</p>
-            </button>
+    <div id="cartSummary" class="cart-summary hidden">
+      <h3>Total: ₹<span id="cartTotal">0</span></h3>
+      <button class="primary-btn" onclick="checkout()">
+        Buy Now
+      </button>
+    </div>
 
-            <button class="dashboard-card" onclick="openOwnerPage('orders')">
-                <span class="card-icon">📦</span>
-                <h3>Customer Orders</h3>
-                <p>Manage customer orders.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('shipping')">
-                <span class="card-icon">🚚</span>
-                <h3>Shipping</h3>
-                <p>Manage shipping status.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('complaints')">
-                <span class="card-icon">📝</span>
-                <h3>Complaints</h3>
-                <p>View customer complaints.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('customers')">
-                <span class="card-icon">👥</span>
-                <h3>Customers</h3>
-                <p>View customer information.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('offers')">
-                <span class="card-icon">🏷️</span>
-                <h3>Offers</h3>
-                <p>Manage store offers.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('arrivals')">
-                <span class="card-icon">✨</span>
-                <h3>New Arrivals</h3>
-                <p>Manage new clothing.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('coins')">
-                <span class="card-icon">🪙</span>
-                <h3>ND's Coins</h3>
-                <p>₹200 purchase = 8 coins.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('storeSettings')">
-                <span class="card-icon">⚙️</span>
-                <h3>Store Settings</h3>
-                <p>Manage shop details.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('sales')">
-                <span class="card-icon">📊</span>
-                <h3>Sales</h3>
-                <p>View sales information.</p>
-            </button>
-
-            <button class="dashboard-card" onclick="openOwnerPage('notifications')">
-                <span class="card-icon">🔔</span>
-                <h3>Notifications</h3>
-                <p>Manage notifications.</p>
-            </button>
-
-        </div>
-
-    </section>
+  </section>
 
 
-    <!-- OWNER SUB PAGE -->
-    <section id="ownerPageSection" class="hidden">
+  <!-- SETTINGS -->
+  <section id="settingsPage" class="page hidden">
 
-        <button class="back-btn" onclick="showOwner()">
-            ← Owner Dashboard
+    <div class="page-top">
+      <button onclick="showHome()">← Home</button>
+    </div>
+
+    <h2>Settings</h2>
+
+    <div class="settings-card">
+      <h3>Customer Support</h3>
+
+      <button onclick="showHelpline()">
+        ☎️ Helpline
+      </button>
+
+      <button onclick="showComplaint()">
+        📝 Complaint
+      </button>
+
+      <button onclick="showLocation()">
+        📍 Shop Location
+      </button>
+    </div>
+
+    <div class="settings-card">
+      <h3>Account</h3>
+
+      <button onclick="customerLogin()">
+        👤 Customer Login
+      </button>
+    </div>
+
+    <div class="settings-card owner-access">
+      <h3>Owner</h3>
+
+      <button onclick="openOwnerLogin()">
+        🔐 Owner Access
+      </button>
+    </div>
+
+  </section>
+
+
+  <!-- CUSTOMER LOGIN -->
+  <div id="loginModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-btn" onclick="closeAll()">✕</button>
+
+      <h2>Customer Login</h2>
+
+      <input
+        id="customerName"
+        type="text"
+        placeholder="Your Name"
+      >
+
+      <input
+        id="customerMobile"
+        type="tel"
+        placeholder="Mobile Number"
+        maxlength="10"
+      >
+
+      <button class="primary-btn" onclick="loginCustomer()">
+        Continue
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- OWNER LOGIN -->
+  <div id="ownerLoginModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-btn" onclick="closeAll()">✕</button>
+
+      <h2>Owner Access</h2>
+
+      <p>Enter your registered mobile number.</p>
+
+      <input
+        id="ownerMobile"
+        type="tel"
+        placeholder="Owner Mobile Number"
+        maxlength="10"
+      >
+
+      <button class="primary-btn" onclick="sendOwnerOTP()">
+        Send OTP
+      </button>
+
+      <div id="otpArea" class="hidden">
+
+        <input
+          id="ownerOTP"
+          type="text"
+          placeholder="Enter OTP"
+          maxlength="6"
+        >
+
+        <button class="primary-btn" onclick="verifyOwnerOTP()">
+          Verify OTP
         </button>
 
-        <div id="ownerPageContent"></div>
+      </div>
 
-    </section>
+    </div>
 
-</main>
-
-
-<footer>
-    © 2026 Kit Kit Fashion
-</footer>
+  </div>
 
 
-<script src="script.js"></script>
+  <!-- OWNER DASHBOARD -->
+  <section id="ownerPage" class="page hidden">
+
+    <div class="owner-header">
+      <div>
+        <h2>Owner Dashboard</h2>
+        <p>Manage your online store</p>
+      </div>
+
+      <button onclick="ownerLogout()">Logout</button>
+    </div>
+
+
+    <div class="owner-grid">
+
+      <button onclick="openAddProduct()">
+        ➕ Add Product
+      </button>
+
+      <button onclick="manageProducts()">
+        👕 Manage Products
+      </button>
+
+      <button onclick="showOrders()">
+        📦 Orders
+      </button>
+
+      <button onclick="showComplaints()">
+        📝 Complaints
+      </button>
+
+      <button onclick="openShopSettings()">
+        🏪 Shop Settings
+      </button>
+
+      <button onclick="openCoinsSettings()">
+        🪙 ND's Coins
+      </button>
+
+    </div>
+
+    <div id="ownerContent"></div>
+
+  </section>
+
+
+  <!-- ADD PRODUCT -->
+  <div id="addProductModal" class="modal hidden">
+
+    <div class="modal-box large">
+
+      <button class="close-btn" onclick="closeAll()">✕</button>
+
+      <h2>Add Product</h2>
+
+      <form id="productForm">
+
+        <label>Product Photo</label>
+
+        <input
+          id="productImage"
+          type="file"
+          accept="image/*"
+          capture="environment"
+        >
+
+        <div id="imagePreview" class="image-preview">
+          <span>Product photo preview</span>
+        </div>
+
+
+        <label>Product Name</label>
+
+        <input
+          id="productName"
+          type="text"
+          placeholder="Example: Premium T-Shirt"
+          required
+        >
+
+
+        <label>Price</label>
+
+        <input
+          id="productPrice"
+          type="number"
+          placeholder="Example: 799"
+          required
+        >
+
+
+        <label>MRP</label>
+
+        <input
+          id="productMRP"
+          type="number"
+          placeholder="Example: 1199"
+        >
+
+
+        <label>Category</label>
+
+        <select id="productCategory">
+
+          <option value="T-Shirts">T-Shirts</option>
+          <option value="Shirts">Shirts</option>
+          <option value="Jeans">Jeans</option>
+          <option value="Hoodies">Hoodies</option>
+          <option value="Dresses">Dresses</option>
+          <option value="Other">Other</option>
+
+        </select>
+
+
+        <label>Description</label>
+
+        <textarea
+          id="productDescription"
+          placeholder="Product description"
+        ></textarea>
+
+
+        <button
+          type="submit"
+          class="primary-btn"
+        >
+          Save Product Online
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- HELPLINE -->
+  <div id="helplineModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-btn" onclick="closeAll()">✕</button>
+
+      <h2>Helpline</h2>
+
+      <p id="helplineNumber">
+        Helpline number will appear here.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- COMPLAINT -->
+  <div id="complaintModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-btn" onclick="closeAll()">✕</button>
+
+      <h2>Submit Complaint</h2>
+
+      <input
+        id="complaintName"
+        type="text"
+        placeholder="Your Name"
+      >
+
+      <textarea
+        id="complaintText"
+        placeholder="Write your complaint"
+      ></textarea>
+
+      <button
+        class="primary-btn"
+        onclick="submitComplaint()"
+      >
+        Submit Complaint
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- LOCATION -->
+  <div id="locationModal" class="modal hidden">
+
+    <div class="modal-box">
+
+      <button class="close-btn" onclick="closeAll()">✕</button>
+
+      <h2>📍 Shop Location</h2>
+
+      <p id="shopLocation">
+        Shop location will appear here.
+      </p>
+
+      <button
+        class="primary-btn"
+        onclick="openMap()"
+      >
+        Open in Google Maps
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- MAIN JAVASCRIPT -->
+  <script src="script.js"></script>
 
 </body>
-</html>
+    </html>
